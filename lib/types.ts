@@ -18,9 +18,14 @@ export type SiteSettings = {
   hero_title: string
   hero_description: string
   announcement: string | null
+  announcement_enabled: boolean
+  public_search_enabled: boolean
+  workflow_enabled: boolean
+  governance_enabled: boolean
   public_fields: Record<string, boolean>
   stats_enabled: boolean
   public_visitor_count_enabled: boolean
+  updated_at: string
 }
 
 export type MarketEntry = {

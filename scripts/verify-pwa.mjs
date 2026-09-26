@@ -65,7 +65,8 @@ try {
   })
 
   assert(browserState.controlled && browserState.registrationCount === 1, "The page is not controlled by the service worker")
-  assert(browserState.cacheNames.includes("rso-pwa-v1-static"), "Static PWA cache was not created")
+  assert(browserState.cacheNames.includes("rso-pwa-v2-static"), "Static PWA cache was not created")
+  assert(browserState.cacheNames.includes("rso-pwa-v2-runtime") && browserState.cachedUrls.includes("/"), "The latest public homepage was not cached for offline use")
   assert(!browserState.cachedUrls.some((path) => path.startsWith("/dashboard") || path.startsWith("/auth")), "Sensitive account pages were cached")
   assert(browserState.manifestHref === "/manifest.webmanifest", "Manifest link is missing from the document")
   assert(browserState.appleIcon === "/apple-touch-icon.png", "Apple touch icon is missing")

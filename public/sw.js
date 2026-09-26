@@ -1,9 +1,8 @@
-const CACHE_VERSION = "rso-pwa-v1"
+const CACHE_VERSION = "rso-pwa-v2"
 const STATIC_CACHE = `${CACHE_VERSION}-static`
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`
 const OFFLINE_URL = "/offline"
 const PRECACHE_URLS = [
-  "/",
   OFFLINE_URL,
   "/manifest.webmanifest",
   "/logo.png",
@@ -37,7 +36,19 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return
 
   if (request.mode === "navigate") {
-    event.respondWith(fetch(request).catch(async () => (await caches.match(OFFLINE_URL)) || Response.error()))
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(request)
+        if (url.pathname === "/" && response.ok) {
+          const copy = response.clone()
+          const cache = await caches.open(RUNTIME_CACHE)
+          await cache.put(request, copy)
+        }
+        return response
+      } catch {
+        return (await caches.match(request)) || (await caches.match(OFFLINE_URL)) || Response.error()
+      }
+    })())
     return
   }
 

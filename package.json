@@ -13,6 +13,7 @@
     "verify:pwa": "node scripts/verify-pwa.mjs",
     "verify:features": "node scripts/verify-all-features.mjs",
     "verify:visitors": "node scripts/verify-visitor-reporting.mjs",
+    "verify:settings": "node scripts/verify-site-settings.mjs",
     "verify:ux": "node scripts/verify-ux-quality.mjs",
     "pwa:icons": "node scripts/generate-pwa-icons.mjs",
     "screenshots": "node scripts/capture-screenshots.mjs"

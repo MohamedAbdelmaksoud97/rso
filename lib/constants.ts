@@ -26,6 +26,10 @@ export const defaultSiteSettings = {
   hero_description:
     "المنظومة الرقمية لحوكمة المزادات وتوثيق التعاملات في أسواق النفع العام، من بوابة السوق حتى سند الترسية.",
   announcement: "منصة موحدة لتوثيق حركة السوق لحظة بلحظة",
+  announcement_enabled: true,
+  public_search_enabled: true,
+  workflow_enabled: true,
+  governance_enabled: true,
   public_fields: {
     seller_name: true,
     commodity_type: true,
@@ -37,6 +41,7 @@ export const defaultSiteSettings = {
   },
   stats_enabled: true,
   public_visitor_count_enabled: true,
+  updated_at: "",
 }
 
 export function formatCurrency(value: number | string | null | undefined) {

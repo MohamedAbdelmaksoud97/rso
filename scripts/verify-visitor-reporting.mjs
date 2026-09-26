@@ -93,7 +93,7 @@ try {
   const visitorSwitch = admin.page.locator("#public_visitor_count_enabled")
   if (!await statsSwitch.isChecked()) await admin.page.getByText("إظهار إحصاءات السوق", { exact: true }).click()
   if (!await visitorSwitch.isChecked()) await admin.page.getByText("إظهار عدد زوار اليوم", { exact: true }).click()
-  await admin.page.getByRole("button", { name: "حفظ ونشر الإعدادات" }).click()
+  await admin.page.getByRole("button", { name: "حفظ ونشر" }).click()
   await waitFor(async () => {
     const { data } = await service.from("site_settings").select("stats_enabled,public_visitor_count_enabled").eq("id", true).single()
     return data?.stats_enabled === true && data?.public_visitor_count_enabled === true
@@ -109,7 +109,7 @@ try {
   await admin.page.goto(`${baseUrl}/dashboard/admin/settings`, { waitUntil: "networkidle" })
   await admin.page.getByText("إظهار عدد زوار اليوم", { exact: true }).click()
   assert(!await admin.page.locator("#public_visitor_count_enabled").isChecked(), "Visitor count switch did not turn off")
-  await admin.page.getByRole("button", { name: "حفظ ونشر الإعدادات" }).click()
+  await admin.page.getByRole("button", { name: "حفظ ونشر" }).click()
   await waitFor(async () => {
     const { data } = await service.from("site_settings").select("public_visitor_count_enabled").eq("id", true).single()
     return data?.public_visitor_count_enabled === false

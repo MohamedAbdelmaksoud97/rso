@@ -216,7 +216,7 @@ try {
   const finalPriceCheckbox = admin.page.locator("#final_price")
   if (await finalPriceCheckbox.isChecked()) await admin.page.getByText("سعر الترسية", { exact: true }).click()
   assert(!await statsSwitch.isChecked() && !await finalPriceCheckbox.isChecked(), "Settings controls did not toggle")
-  await admin.page.getByRole("button", { name: "حفظ ونشر الإعدادات" }).click()
+  await admin.page.getByRole("button", { name: "حفظ ونشر" }).click()
   await admin.page.waitForLoadState("networkidle")
   await waitFor(async () => {
     const { data } = await service.from("site_settings").select("*").eq("id", true).single()

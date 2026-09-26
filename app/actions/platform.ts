@@ -129,8 +129,23 @@ export async function updateSiteSettings(formData: FormData) {
   const heroDescription = String(formData.get("hero_description") ?? "").trim()
   if (!platformName || !heroTitle || !heroDescription) redirect(`/dashboard/admin/settings?error=${encodeURIComponent("أكمل اسم المنصة والعنوان والوصف قبل النشر.")}`)
   const publicFields = ["seller_name", "commodity_type", "quantity", "total_weight_kg", "final_price", "buyer_name", "settled_at"].reduce<Record<string, boolean>>((fields, key) => { fields[key] = formData.get(key) === "on"; return fields }, {})
-  const { error } = await supabase.from("site_settings").update({ platform_name: platformName, hero_title: heroTitle, hero_description: heroDescription, announcement: String(formData.get("announcement") ?? "").trim() || null, stats_enabled: formData.get("stats_enabled") === "on", public_visitor_count_enabled: formData.get("public_visitor_count_enabled") === "on", public_fields: publicFields, updated_by: profile.id }).eq("id", true)
-  if (error) redirect(`/dashboard/admin/settings?error=${encodeURIComponent(platformErrorMessage("settings", error.message))}`)
+  const { data, error } = await supabase.from("site_settings").update({
+    platform_name: platformName,
+    hero_title: heroTitle,
+    hero_description: heroDescription,
+    announcement: String(formData.get("announcement") ?? "").trim() || null,
+    announcement_enabled: formData.get("announcement_enabled") === "on",
+    public_search_enabled: formData.get("public_search_enabled") === "on",
+    workflow_enabled: formData.get("workflow_enabled") === "on",
+    governance_enabled: formData.get("governance_enabled") === "on",
+    stats_enabled: formData.get("stats_enabled") === "on",
+    public_visitor_count_enabled: formData.get("public_visitor_count_enabled") === "on",
+    public_fields: publicFields,
+    updated_by: profile.id,
+  }).eq("id", true).select("id").single()
+  if (error || !data) redirect(`/dashboard/admin/settings?error=${encodeURIComponent(platformErrorMessage("settings", error?.message ?? ""))}`)
   revalidatePath("/")
+  revalidatePath("/verify")
   revalidatePath("/dashboard/admin/settings")
+  redirect(`/dashboard/admin/settings?success=${encodeURIComponent("تم حفظ الإعدادات ونشرها على الصفحة العامة.")}`)
 }

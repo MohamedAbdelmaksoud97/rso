@@ -4,7 +4,7 @@ import type { DailyAttendance, MarketEntry, Profile, Settlement, SiteSettings } 
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   const supabase = await createClient()
-  const { data } = await supabase.from("site_settings").select("platform_name,hero_title,hero_description,announcement,public_fields,stats_enabled,public_visitor_count_enabled").eq("id", true).maybeSingle()
+  const { data } = await supabase.from("site_settings").select("platform_name,hero_title,hero_description,announcement,announcement_enabled,public_search_enabled,workflow_enabled,governance_enabled,public_fields,stats_enabled,public_visitor_count_enabled,updated_at").eq("id", true).maybeSingle()
   return (data as SiteSettings | null) ?? defaultSiteSettings
 }
 
