@@ -138,6 +138,7 @@ export async function updateSiteSettings(formData: FormData) {
     public_search_enabled: formData.get("public_search_enabled") === "on",
     workflow_enabled: formData.get("workflow_enabled") === "on",
     governance_enabled: formData.get("governance_enabled") === "on",
+    news_enabled: formData.get("news_enabled") === "on",
     stats_enabled: formData.get("stats_enabled") === "on",
     public_visitor_count_enabled: formData.get("public_visitor_count_enabled") === "on",
     public_fields: publicFields,

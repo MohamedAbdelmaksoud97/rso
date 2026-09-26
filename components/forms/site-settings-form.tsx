@@ -122,6 +122,7 @@ export function SiteSettingsForm({ settings, error, success }: SiteSettingsFormP
                 <VisibilitySwitch id="public_visitor_count_enabled" name="public_visitor_count_enabled" title="إظهار عدد زوار اليوم" description="يظهر العدد الإجمالي فقط دون أي بيانات شخصية." defaultChecked={settings.public_visitor_count_enabled} icon="users" onCheckedChange={markAsChanged} />
                 <VisibilitySwitch id="workflow_enabled" name="workflow_enabled" title="إظهار خطوات عمل المنصة" description="يعرض رحلة التوثيق من بوابة السوق إلى سند الترسية." defaultChecked={settings.workflow_enabled} onCheckedChange={markAsChanged} />
                 <VisibilitySwitch id="governance_enabled" name="governance_enabled" title="إظهار قسم الحوكمة" description="يعرض مزايا الحوكمة والتحكم للزوار." defaultChecked={settings.governance_enabled} onCheckedChange={markAsChanged} />
+                <VisibilitySwitch id="news_enabled" name="news_enabled" title="إظهار الأخبار والإعلانات" description="يعرض المحتوى المنشور من مركز الأخبار في الصفحة الرئيسية." defaultChecked={settings.news_enabled} onCheckedChange={markAsChanged} />
               </FieldGroup>
             </FieldSet>
           </CardContent>

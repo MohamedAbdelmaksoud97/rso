@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-26T18:34:44.701Z",
+  "generatedAt": "2026-09-26T18:55:14.984Z",
   "pages": [
     {
       "label": "الرئيسية",
@@ -70,6 +70,13 @@
       "violations": [],
       "incomplete": 1,
       "passes": 49
+    },
+    {
+      "label": "الأخبار والإعلانات",
+      "path": "/dashboard/admin/content",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 44
     },
     {
       "label": "إعدادات المنصة",

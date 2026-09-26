@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ArrowLeftIcon, BadgeCheckIcon, FileCheck2Icon, GavelIcon, QrCodeIcon, SearchIcon, ShieldCheckIcon, SparklesIcon, UsersIcon } from "lucide-react"
 import { BrandLogo } from "@/components/brand-logo"
+import { PublicContentSection } from "@/components/content/public-content-section"
 import { PublicSettingsSync } from "@/components/public-settings-sync"
 import { Badge } from "@/components/ui/badge"
 import { PendingSubmitButton } from "@/components/pending-submit-button"
@@ -9,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
 import { Separator } from "@/components/ui/separator"
 import { formatNumber } from "@/lib/constants"
-import { getPublicMarketStats, getSiteSettings } from "@/lib/queries"
+import { getPublicContentPosts, getPublicMarketStats, getSiteSettings } from "@/lib/queries"
 
 const workflow = [
   { icon: UsersIcon, number: "01", title: "تسجيل الدخول للسوق", description: "يوثق البواب بيانات المورد والبضاعة ويصدر بطاقة QR فريدة قابلة للطباعة." },
@@ -18,7 +19,7 @@ const workflow = [
 ]
 
 export default async function Home() {
-  const [settings, stats] = await Promise.all([getSiteSettings(), getPublicMarketStats()])
+  const [settings, stats, posts] = await Promise.all([getSiteSettings(), getPublicMarketStats(), getPublicContentPosts()])
 
   return (
     <main className="min-h-screen overflow-hidden">
@@ -26,7 +27,8 @@ export default async function Home() {
       <header className="relative border-b bg-card shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
           <BrandLogo compact />
-          <nav className="hidden items-center gap-7 text-sm font-medium md:flex" aria-label="التنقل الرئيسي">
+          <nav className="hidden items-center gap-7 text-sm font-medium lg:flex" aria-label="التنقل الرئيسي">
+            {settings.news_enabled && posts.length > 0 && <a href="#latest-news" className="text-muted-foreground transition-colors hover:text-foreground">الأخبار والإعلانات</a>}
             {settings.workflow_enabled && <a href="#how-it-works" className="text-muted-foreground transition-colors hover:text-foreground">كيف تعمل؟</a>}
             {settings.governance_enabled && <a href="#governance" className="text-muted-foreground transition-colors hover:text-foreground">الحوكمة والشفافية</a>}
             {settings.public_search_enabled && <Link href="/verify" className="text-muted-foreground transition-colors hover:text-foreground">التحقق من سند</Link>}
@@ -75,6 +77,8 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {settings.news_enabled && <PublicContentSection posts={posts} />}
 
       {settings.workflow_enabled && <section id="how-it-works" className="bg-card py-24">
         <div className="mx-auto max-w-7xl px-5 lg:px-8">

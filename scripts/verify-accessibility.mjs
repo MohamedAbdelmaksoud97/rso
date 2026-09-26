@@ -107,6 +107,7 @@ try {
     ["المشترون المعتمدون", "/dashboard/admin/buyers"],
     ["العمولات", "/dashboard/admin/commissions"],
     ["التقارير", "/dashboard/admin/reports"],
+    ["الأخبار والإعلانات", "/dashboard/admin/content"],
     ["إعدادات المنصة", "/dashboard/admin/settings"],
     ["سجل السندات للمدير", "/dashboard/receipts"],
     ["حساب المدير", "/dashboard/account"],

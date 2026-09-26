@@ -266,8 +266,10 @@ try {
   await gatekeeper.page.getByText("بوّاب").first().waitFor()
   assert(await gatekeeper.page.getByText("إعدادات المنصة").count() === 0, "Gatekeeper sees admin navigation")
   await gatekeeper.page.goto(`${baseUrl}/dashboard/admin/users`, { waitUntil: "networkidle" })
+  await gatekeeper.page.waitForURL((url) => url.pathname === "/dashboard", { timeout: 10_000 })
   assert(new URL(gatekeeper.page.url()).pathname === "/dashboard", "Gatekeeper reached admin users page")
   await gatekeeper.page.goto(`${baseUrl}/dashboard/settlements/new`, { waitUntil: "networkidle" })
+  await gatekeeper.page.waitForURL((url) => url.pathname === "/dashboard", { timeout: 10_000 })
   assert(new URL(gatekeeper.page.url()).pathname === "/dashboard", "Gatekeeper reached auctioneer settlement page")
   pass("صلاحيات البوّاب", "لا يرى أدوات المدير ولا يستطيع فتح صفحة الترسية")
 
@@ -315,6 +317,7 @@ try {
   const auctioneer = await login(browser, env.RSO_AUCTIONEER_EMAIL, env.RSO_AUCTIONEER_PASSWORD)
   assert(await auctioneer.page.getByText("المستخدمون والاعتمادات").count() === 0, "Auctioneer sees admin navigation")
   await auctioneer.page.goto(`${baseUrl}/dashboard/entries/new`, { waitUntil: "networkidle" })
+  await auctioneer.page.waitForURL((url) => url.pathname === "/dashboard", { timeout: 10_000 })
   assert(new URL(auctioneer.page.url()).pathname === "/dashboard", "Auctioneer reached gatekeeper page")
   pass("صلاحيات الدلّال", "لا يرى أدوات المدير ولا يستطيع تسجيل دخولات السوق")
 

@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { BarChart3Icon, FileCheck2Icon, GavelIcon, HomeIcon, KeyRoundIcon, LogOutIcon, QrCodeIcon, Settings2Icon, UserCheckIcon, UsersIcon, WalletCardsIcon } from "lucide-react"
+import { BarChart3Icon, FileCheck2Icon, GavelIcon, HomeIcon, KeyRoundIcon, LogOutIcon, NewspaperIcon, QrCodeIcon, Settings2Icon, UserCheckIcon, UsersIcon, WalletCardsIcon } from "lucide-react"
 import { logout } from "@/app/actions/auth"
 import { BrandLogo } from "@/components/brand-logo"
 import { PendingSubmitButton } from "@/components/pending-submit-button"
@@ -23,6 +23,7 @@ const roleItems: Record<AppRole, typeof commonItems> = {
     { href: "/dashboard/admin/buyers", label: "المشترون المعتمدون", icon: UsersIcon },
     { href: "/dashboard/admin/commissions", label: "العمولات والتسويات", icon: BarChart3Icon },
     { href: "/dashboard/admin/reports", label: "مركز التقارير", icon: BarChart3Icon },
+    { href: "/dashboard/admin/content", label: "الأخبار والإعلانات", icon: NewspaperIcon },
     { href: "/dashboard/admin/settings", label: "إعدادات المنصة", icon: Settings2Icon },
   ],
   gatekeeper: [{ href: "/dashboard/entries/new", label: "تسجيل دخول جديد", icon: QrCodeIcon }],

@@ -18,6 +18,7 @@
     "verify:reports": "node scripts/verify-admin-reports.mjs",
     "verify:layout": "node scripts/verify-layout-polish.mjs",
     "verify:notifications": "node scripts/verify-realtime-notifications.mjs",
+    "verify:content": "node scripts/verify-content-management.mjs",
     "verify:ux": "node scripts/verify-ux-quality.mjs",
     "pwa:icons": "node scripts/generate-pwa-icons.mjs",
     "screenshots": "node scripts/capture-screenshots.mjs"

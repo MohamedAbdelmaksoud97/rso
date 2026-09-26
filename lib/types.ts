@@ -22,9 +22,24 @@ export type SiteSettings = {
   public_search_enabled: boolean
   workflow_enabled: boolean
   governance_enabled: boolean
+  news_enabled: boolean
   public_fields: Record<string, boolean>
   stats_enabled: boolean
   public_visitor_count_enabled: boolean
+  updated_at: string
+}
+
+export type ContentPost = {
+  id: number
+  kind: "news" | "announcement"
+  title: string
+  summary: string
+  body: string
+  is_published: boolean
+  is_featured: boolean
+  publish_at: string
+  expires_at: string | null
+  created_at: string
   updated_at: string
 }
 

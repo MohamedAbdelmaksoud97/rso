@@ -54,6 +54,7 @@ async function setSwitch(page, id, checked) {
     public_visitor_count_enabled: "إظهار عدد زوار اليوم",
     workflow_enabled: "إظهار خطوات عمل المنصة",
     governance_enabled: "إظهار قسم الحوكمة",
+    news_enabled: "إظهار الأخبار والإعلانات",
   }
   const control = page.getByRole("switch", { name: labels[id] })
   const current = await control.getAttribute("data-checked") !== null
@@ -99,6 +100,7 @@ try {
     governance_enabled: true,
     stats_enabled: true,
     public_visitor_count_enabled: true,
+    news_enabled: true,
   })
 
   const adminContext = await browser.newContext({ viewport: { width: 1440, height: 1000 } })
@@ -141,6 +143,7 @@ try {
   await setSwitch(adminPage, "public_visitor_count_enabled", false)
   await setSwitch(adminPage, "workflow_enabled", false)
   await setSwitch(adminPage, "governance_enabled", false)
+  await setSwitch(adminPage, "news_enabled", false)
   await setCheckbox(adminPage, "final_price", false)
   await publish(adminPage)
 
@@ -168,6 +171,7 @@ try {
   assert(published.workflow_enabled === false, "Workflow setting was not saved")
   assert(published.governance_enabled === false, "Governance setting was not saved")
   assert(published.stats_enabled === false, "Statistics setting was not saved")
+  assert(published.news_enabled === false, "News setting was not saved")
   assert(published.public_fields.final_price === false, "Receipt privacy setting was not saved")
 
   await updateSettings({
@@ -181,6 +185,7 @@ try {
     governance_enabled: original.governance_enabled,
     stats_enabled: original.stats_enabled,
     public_visitor_count_enabled: original.public_visitor_count_enabled,
+    news_enabled: original.news_enabled,
     public_fields: original.public_fields,
   })
   restored = true
@@ -202,6 +207,7 @@ try {
       "workflow-section-visibility",
       "governance-section-visibility",
       "announcement-visibility",
+      "news-section-visibility",
       "receipt-field-privacy",
       "database-persistence",
       "realtime-public-refresh",
@@ -221,6 +227,7 @@ try {
       governance_enabled: original.governance_enabled,
       stats_enabled: original.stats_enabled,
       public_visitor_count_enabled: original.public_visitor_count_enabled,
+      news_enabled: original.news_enabled,
       public_fields: original.public_fields,
     })
   }

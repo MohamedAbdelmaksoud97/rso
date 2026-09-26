@@ -30,6 +30,7 @@ export const defaultSiteSettings = {
   public_search_enabled: true,
   workflow_enabled: true,
   governance_enabled: true,
+  news_enabled: true,
   public_fields: {
     seller_name: true,
     commodity_type: true,
@@ -61,6 +62,14 @@ export function formatDate(value: string | null | undefined) {
   return new Intl.DateTimeFormat("ar-SA", {
     dateStyle: "medium",
     timeStyle: "short",
+    timeZone: "Asia/Riyadh",
+  }).format(new Date(value))
+}
+
+export function formatDateOnly(value: string | null | undefined) {
+  if (!value) return "—"
+  return new Intl.DateTimeFormat("ar-SA", {
+    dateStyle: "long",
     timeZone: "Asia/Riyadh",
   }).format(new Date(value))
 }

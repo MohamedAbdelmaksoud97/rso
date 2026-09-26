@@ -54,6 +54,10 @@ const eventLabels: Record<string, string> = {
   commission_updated: "تحديث العمولات",
   profile_approved: "اعتماد مستخدم",
   site_settings_updated: "تحديث إعدادات المنصة",
+  content_created: "إنشاء محتوى عام",
+  content_updated: "تعديل محتوى عام",
+  content_published: "نشر محتوى عام",
+  content_unpublished: "إخفاء محتوى عام",
 }
 
 function reportDate(value: string) {

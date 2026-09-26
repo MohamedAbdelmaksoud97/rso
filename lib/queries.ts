@@ -1,11 +1,40 @@
 import { createClient } from "@/lib/server"
 import { defaultSiteSettings } from "@/lib/constants"
-import type { DailyAttendance, MarketEntry, Profile, Settlement, SiteSettings } from "@/lib/types"
+import type { ContentPost, DailyAttendance, MarketEntry, Profile, Settlement, SiteSettings } from "@/lib/types"
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   const supabase = await createClient()
-  const { data } = await supabase.from("site_settings").select("platform_name,hero_title,hero_description,announcement,announcement_enabled,public_search_enabled,workflow_enabled,governance_enabled,public_fields,stats_enabled,public_visitor_count_enabled,updated_at").eq("id", true).maybeSingle()
+  const { data } = await supabase.from("site_settings").select("platform_name,hero_title,hero_description,announcement,announcement_enabled,public_search_enabled,workflow_enabled,governance_enabled,news_enabled,public_fields,stats_enabled,public_visitor_count_enabled,updated_at").eq("id", true).maybeSingle()
   return (data as SiteSettings | null) ?? defaultSiteSettings
+}
+
+export async function getPublicContentPosts(limit = 6): Promise<ContentPost[]> {
+  const supabase = await createClient()
+  const now = new Date().toISOString()
+  const { data } = await supabase
+    .from("content_posts")
+    .select("id,kind,title,summary,body,is_published,is_featured,publish_at,expires_at,created_at,updated_at")
+    .eq("is_published", true)
+    .lte("publish_at", now)
+    .or(`expires_at.is.null,expires_at.gt.${now}`)
+    .order("is_featured", { ascending: false })
+    .order("publish_at", { ascending: false })
+    .limit(limit)
+  return (data ?? []) as ContentPost[]
+}
+
+export async function getPublicContentPost(id: number): Promise<ContentPost | null> {
+  const supabase = await createClient()
+  const now = new Date().toISOString()
+  const { data } = await supabase
+    .from("content_posts")
+    .select("id,kind,title,summary,body,is_published,is_featured,publish_at,expires_at,created_at,updated_at")
+    .eq("id", id)
+    .eq("is_published", true)
+    .lte("publish_at", now)
+    .or(`expires_at.is.null,expires_at.gt.${now}`)
+    .maybeSingle()
+  return data as ContentPost | null
 }
 
 export async function getPublicMarketStats() {
