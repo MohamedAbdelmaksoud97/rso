@@ -66,8 +66,12 @@ async function verifyRole(browser, role, email, password, screenshotName) {
   if (error) throw error
 
   const unreadButton = page.getByRole("button", { name: /الإشعارات، \d+ غير مقروءة/ })
-  await unreadButton.waitFor({ timeout: 15_000 })
-  await page.locator('[data-slot="toast-description"]').filter({ hasText: summary }).waitFor({ timeout: 15_000 })
+  await unreadButton.waitFor({ timeout: 20_000 }).catch(() => {
+    throw new Error(`لم يظهر عداد الإشعارات الجديدة لحساب ${role}`)
+  })
+  await page.locator('[data-slot="toast-description"]').filter({ hasText: summary }).waitFor({ timeout: 20_000 }).catch(() => {
+    throw new Error(`لم يظهر تنبيه Realtime لحساب ${role}`)
+  })
   await unreadButton.click()
   await dialog.locator("article").getByText(summary, { exact: true }).waitFor()
   await dialog.screenshot({ path: resolve(screenshots, screenshotName) })

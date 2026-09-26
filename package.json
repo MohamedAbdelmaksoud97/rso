@@ -12,6 +12,8 @@
     "verify:auth": "node scripts/verify-auth-flows.mjs",
     "verify:buyers": "node scripts/verify-approved-buyers-crud.mjs",
     "verify:custom-commodity": "node scripts/verify-custom-commodity.mjs",
+    "verify:security": "node scripts/verify-release-security.mjs",
+    "verify:release": "node scripts/verify-production-readiness.mjs",
     "verify:accessibility": "node scripts/verify-accessibility.mjs",
     "verify:pwa": "node scripts/verify-pwa.mjs",
     "verify:features": "node scripts/verify-all-features.mjs",

@@ -71,8 +71,12 @@ export function RealtimeNotifications({ profile }: { profile: Profile }) {
         })
         .subscribe(async (status) => {
           if (disposed) return
-          setConnected(status === "SUBSCRIBED")
-          if (status === "SUBSCRIBED") await syncLatest()
+          if (status === "SUBSCRIBED") {
+            await syncLatest()
+            if (!disposed) setConnected(true)
+          } else {
+            setConnected(false)
+          }
           if (["CHANNEL_ERROR", "TIMED_OUT", "CLOSED"].includes(status) && !reconnectTimer) {
             reconnectTimer = setTimeout(async () => {
               reconnectTimer = undefined
@@ -106,7 +110,7 @@ export function RealtimeNotifications({ profile }: { profile: Profile }) {
         </div>
         <DialogDescription>{profile.role === "admin" ? "آخر العمليات المسجلة داخل السوق." : "آخر العمليات التي نفذتها على المنصة."}</DialogDescription>
       </DialogHeader>
-      <div className="-mx-1 flex max-h-[55vh] flex-col gap-2 overflow-y-auto px-1" aria-live="polite">
+      <div className="-mx-1 flex max-h-[55vh] flex-col gap-2 overflow-y-auto px-1 outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="قائمة الإشعارات" aria-live="polite" tabIndex={0}>
         {events.length === 0 ? <div className="rounded-xl border border-dashed px-4 py-10 text-center"><BellIcon className="mx-auto size-8 text-muted-foreground" /><p className="mt-3 font-semibold">لا توجد إشعارات جديدة</p><p className="mt-1 text-sm text-muted-foreground">ستظهر العمليات هنا فور تسجيلها.</p></div> : events.map((event) => <article key={event.id} className="flex items-start gap-3 rounded-xl border p-3">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><ActivityIcon className="size-4" /></span>
           <div className="min-w-0 flex-1"><p className="text-sm font-semibold leading-6">{event.summary}</p><time className="text-xs text-muted-foreground" dateTime={event.created_at}>{new Intl.DateTimeFormat("ar-SA", { dateStyle: "medium", timeStyle: "short" }).format(new Date(event.created_at))}</time></div>
