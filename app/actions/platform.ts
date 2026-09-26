@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/server"
+import { commodityTypes } from "@/lib/constants"
 import type { AppRole, Profile } from "@/lib/types"
 
 type PlatformOperation = "entry" | "settlement" | "approval" | "buyer" | "buyer-update" | "buyer-delete" | "commission" | "settings"
@@ -46,7 +47,12 @@ export async function createMarketEntry(formData: FormData) {
   const mobileOrId = String(formData.get("mobile_or_id") ?? "").trim()
   const quantity = formData.get("quantity") ? Number(formData.get("quantity")) : null
   const weight = formData.get("total_weight_kg") ? Number(formData.get("total_weight_kg")) : null
-  const commodityType = String(formData.get("commodity_type") ?? "").trim()
+  const selectedCommodityType = String(formData.get("commodity_type") ?? "").trim()
+  const customCommodityType = String(formData.get("custom_commodity_type") ?? "").trim()
+  const commodityType = selectedCommodityType === "أخرى" ? customCommodityType : selectedCommodityType
+  if (entryKind === "seller" && !commodityTypes.includes(selectedCommodityType as (typeof commodityTypes)[number])) redirect(`/dashboard/entries/new?error=${encodeURIComponent("اختر نوع سلعة صالحًا من القائمة.")}`)
+  if (entryKind === "seller" && selectedCommodityType === "أخرى" && customCommodityType.length < 2) redirect(`/dashboard/entries/new?error=${encodeURIComponent("اكتب نوع السلعة الأخرى من حرفين على الأقل.")}`)
+  if (entryKind === "seller" && commodityType.length > 80) redirect(`/dashboard/entries/new?error=${encodeURIComponent("يجب ألا يتجاوز نوع السلعة 80 حرفًا.")}`)
   if (entryKind === "seller" && (!personName || !mobileOrId || !commodityType || !quantity || !weight)) redirect(`/dashboard/entries/new?error=${encodeURIComponent("أكمل بيانات المورد والبضاعة المطلوبة.")}`)
   if (entryKind === "seller" && (quantity === null || !Number.isFinite(quantity) || quantity <= 0 || weight === null || !Number.isFinite(weight) || weight <= 0)) redirect(`/dashboard/entries/new?error=${encodeURIComponent("أدخل كمية ووزنًا أكبر من صفر.")}`)
   if (personName && personName.length < 2) redirect(`/dashboard/entries/new?error=${encodeURIComponent("يجب أن يتكون الاسم من حرفين على الأقل.")}`)
