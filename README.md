@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# منصة رسو
 
-## Getting Started
+منظومة عربية لإدارة وتوثيق المزادات في أسواق النفع العام. تغطي رحلة البضاعة من تسجيلها عند البوابة وإصدار QR، مروراً بمسح الدلّال للكود، وحتى إصدار سند الترسية وحساب العمولات.
 
-First, run the development server:
+## الوظائف
+
+- تسجيل الموظفين وتأكيد البريد ثم اعتماد المدير للدور الوظيفي.
+- أدوار محمية بسياسات RLS: مدير، دلّال، وبوّاب.
+- تسجيل البائع أو الزائر وإصدار بطاقة QR قابلة للطباعة للبضاعة.
+- مسح QR من الهاتف وتوثيق المشتري وسعر الترسية.
+- دليل مشترين معتمدين مع دعم المشتري الجديد.
+- سند ترسية قابل للطباعة والتحقق العام برقم السند أو الجوال.
+- عمولات ديناميكية للدلّال والمنصة، وتسويات يومية مجمعة.
+- لوحة إشراف لحظية باستخدام Supabase Realtime.
+- تحكم المدير في محتوى الصفحة العامة والحقول المنشورة من السند.
+- تسجيل الدخول، تأكيد البريد، استعادة كلمة المرور وتغييرها.
+- تطبيق PWA قابل للتثبيت مع أيقونات Android وiOS ووضع آمن عند انقطاع الاتصال.
+
+## التشغيل
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+انسخ `.env.example` إلى `.env.local` وأدخل بيانات مشروع Supabase.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## تجهيز Supabase
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+ملفات المخطط موجودة في `supabase/migrations`. ويمكن تطبيقها بحساب CLI مرتبط أو برابط PostgreSQL:
 
-## Learn More
+```bash
+npx supabase migration up --db-url "$DATABASE_URL" --include-all
+```
 
-To learn more about Next.js, take a look at the following resources:
+أو بعد ربط Supabase CLI بالمشروع:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npx supabase link --project-ref YOUR_PROJECT_REF
+npx supabase migration up --linked
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+أضف `SUPABASE_SERVICE_ROLE_KEY` وبيانات المدير إلى `.env.local`، ثم أنشئ حساب المدير:
 
-## Deploy on Vercel
+```bash
+npm run bootstrap:admin
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+لا يُرسل مفتاح `SUPABASE_SERVICE_ROLE_KEY` إلى المتصفح ولا يجب أن يُرفع إلى Git.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## الفحص
+
+```bash
+npm run lint
+npm run build
+npm run verify:platform
+npm run verify:auth
+npm run verify:pwa
+npm run verify:features
+```
+
+يتحقق `verify:platform` من الأدوار وRLS والعمولات وQR والسند والبحث العام وRealtime. ويتحقق `verify:auth` من التسجيل والاستعادة وتغيير كلمة المرور، ويفحص `verify:pwa` الـ manifest والأيقونات وService Worker وقابلية التثبيت ووضع offline. ويشغّل `verify:features` دورة واجهة كاملة للأدوار الثلاثة وينظف بياناتها التجريبية تلقائيًا. يجب تشغيل الخادم محليًا قبل اختبارات المتصفح.
+
+لتحديث أيقونات التطبيق بعد تغيير الشعار:
+
+```bash
+npm run pwa:icons
+```
+
+لالتقاط صور حقيقية من الحسابات وقاعدة البيانات أثناء تشغيل الخادم:
+
+```bash
+npm run screenshots
+```
+
+تُحفظ الصور في `artifacts/screenshots`. ومسارات `/preview/*` متاحة في وضع التطوير فقط لتصميم الواجهات، ولا تظهر في الإنتاج.

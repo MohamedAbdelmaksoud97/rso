@@ -1,0 +1,20 @@
+import { BarChart3Icon, PercentIcon } from "lucide-react"
+import { updateCommissionSettings } from "@/app/actions/platform"
+import { AuthMessage } from "@/components/auth-message"
+import { Badge } from "@/components/ui/badge"
+import { PendingSubmitButton } from "@/components/pending-submit-button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { requireAdminPage } from "@/lib/admin"
+import { formatCurrency, formatDate, formatNumber } from "@/lib/constants"
+import { createClient } from "@/lib/server"
+
+export default async function CommissionsPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  await requireAdminPage()
+  const messages = await searchParams
+  const supabase = await createClient()
+  const [{ data: active }, { data: summary }] = await Promise.all([supabase.from("commission_settings").select("*").eq("is_active", true).maybeSingle(), supabase.from("daily_commission_summary").select("*").order("business_date", { ascending: false }).limit(30)])
+  return <div className="mx-auto max-w-7xl"><div className="mb-7"><Badge variant="secondary"><BarChart3Icon />الإدارة المالية</Badge><h1 className="mt-3 text-3xl font-black">العمولات والتسويات اليومية</h1><p className="mt-2 text-muted-foreground">النسب الجديدة تطبق على الصفقات التالية وتحفظ كل صفقة بنسبتها وقت الترسية.</p></div><div className="grid gap-6 xl:grid-cols-[.65fr_1.35fr]"><Card><CardHeader><CardTitle>إعداد النسب</CardTitle><CardDescription>النسبة الحالية للدلّال {formatNumber(active?.auctioneer_rate_percent)}% وللمنصة {formatNumber(active?.platform_rate_percent)}%</CardDescription></CardHeader><CardContent><AuthMessage {...messages} /><form action={updateCommissionSettings}><FieldGroup><Field><FieldLabel htmlFor="auctioneer_rate_percent">عمولة الدلّال لكل صفقة (%)</FieldLabel><Input id="auctioneer_rate_percent" name="auctioneer_rate_percent" type="number" min="0" max="100" step="0.0001" required defaultValue={active?.auctioneer_rate_percent ?? 1} /><FieldDescription>تُحسب من سعر الترسية النهائي.</FieldDescription></Field><Field><FieldLabel htmlFor="platform_rate_percent">عمولة المنصة اليومية (%)</FieldLabel><Input id="platform_rate_percent" name="platform_rate_percent" type="number" min="0" max="100" step="0.0001" required defaultValue={active?.platform_rate_percent ?? 0.5} /><FieldDescription>تظهر مجمعة في التسوية اليومية لكل دلّال.</FieldDescription></Field><Field><PendingSubmitButton pendingText="جاري تفعيل النسب…" className="w-full"><PercentIcon data-icon="inline-start" />تفعيل النسب الجديدة</PendingSubmitButton></Field></FieldGroup></form></CardContent></Card><Card><CardHeader><CardTitle>ملخص التسويات</CardTitle><CardDescription>إجمالي يومي لكل دلّال حسب الصفقات المسجلة.</CardDescription></CardHeader><CardContent><Table><TableHeader><TableRow><TableHead>اليوم</TableHead><TableHead>عدد الصفقات</TableHead><TableHead>إجمالي الترسية</TableHead><TableHead>عمولة الدلّال</TableHead><TableHead>حصة المنصة</TableHead><TableHead>الصافي</TableHead></TableRow></TableHeader><TableBody>{(summary ?? []).length === 0 ? <TableRow><TableCell colSpan={6} className="h-28 text-center text-muted-foreground">لا توجد تسويات بعد.</TableCell></TableRow> : (summary ?? []).map((row, index) => <TableRow key={`${row.auctioneer_id}-${row.business_date}-${index}`}><TableCell>{formatDate(row.business_date)}</TableCell><TableCell>{formatNumber(row.deals_count)}</TableCell><TableCell>{formatCurrency(row.gross_sales)}</TableCell><TableCell>{formatCurrency(row.auctioneer_commission)}</TableCell><TableCell>{formatCurrency(row.platform_commission)}</TableCell><TableCell className="font-bold">{formatCurrency(row.net_commission)}</TableCell></TableRow>)}</TableBody></Table></CardContent></Card></div></div>
+}

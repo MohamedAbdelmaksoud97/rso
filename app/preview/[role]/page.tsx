@@ -1,0 +1,30 @@
+import Link from "next/link"
+import { notFound } from "next/navigation"
+import { BarChart3Icon, EyeIcon, FileCheck2Icon, GavelIcon, PackageCheckIcon, QrCodeIcon, RadioIcon, UserCheckIcon } from "lucide-react"
+import { BrandLogo } from "@/components/brand-logo"
+import { EntryForm } from "@/components/forms/entry-form"
+import { SettlementForm } from "@/components/forms/settlement-form"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { formatCurrency } from "@/lib/constants"
+
+const roles = ["admin", "gatekeeper", "auctioneer"] as const
+
+export default async function PreviewRolePage({ params }: { params: Promise<{ role: string }> }) {
+  if (process.env.NODE_ENV === "production") notFound()
+  const { role } = await params
+  if (!roles.includes(role as (typeof roles)[number])) notFound()
+  return <main className="min-h-screen bg-muted/40"><header className="border-b bg-card"><div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4"><BrandLogo compact /><div className="flex items-center gap-2"><Badge variant="secondary"><EyeIcon />وضع المعاينة</Badge><Button render={<Link href="/" />} nativeButton={false} variant="ghost">الرئيسية</Button></div></div></header><div className="mx-auto max-w-7xl px-5 py-8"><div className="mb-7 flex flex-wrap gap-2">{roles.map((item) => <Button key={item} render={<Link href={`/preview/${item}`} />} nativeButton={false} variant={item === role ? "default" : "outline"}>{item === "admin" ? "المدير" : item === "gatekeeper" ? "البوّاب" : "الدلّال"}</Button>)}</div>{role === "admin" ? <AdminPreview /> : role === "gatekeeper" ? <GatekeeperPreview /> : <AuctioneerPreview />}</div></main>
+}
+
+function AdminPreview() {
+  return <div className="flex flex-col gap-6"><div><Badge variant="secondary"><RadioIcon />إشراف مباشر</Badge><h1 className="mt-3 text-3xl font-black">صباح الخير، مدير منصة رسو</h1><p className="mt-2 text-muted-foreground">هذه صورة لحظية لأداء السوق اليوم.</p></div><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><PreviewStat icon={PackageCheckIcon} label="دخولات السوق" value="١٢٨" /><PreviewStat icon={FileCheck2Icon} label="صفقات اليوم" value="٨٤" /><PreviewStat icon={GavelIcon} label="قيمة الترسية" value="٢٤٨٬٧٥٠ ر.س" /><PreviewStat icon={BarChart3Icon} label="عمولة المنصة" value="١٬٢٤٣٫٧٥ ر.س" /></div><div className="grid gap-6 lg:grid-cols-[1.4fr_.6fr]"><Card><CardHeader><CardTitle>أحدث صفقات اليوم</CardTitle><CardDescription>تحديث تلقائي عند توثيق أي سند</CardDescription></CardHeader><CardContent><Table><TableHeader><TableRow><TableHead>السند</TableHead><TableHead>الصنف</TableHead><TableHead>المشتري</TableHead><TableHead>السعر</TableHead></TableRow></TableHeader><TableBody>{[["RSO-S-20260926-000084", "خلاص", "مؤسسة نخبة التمور", 7250], ["RSO-S-20260926-000083", "سكري", "أسواق الخير", 4800], ["RSO-S-20260926-000082", "صقعي", "محمد السالم", 6120]].map((row) => <TableRow key={String(row[0])}><TableCell dir="ltr" className="font-bold">{row[0]}</TableCell><TableCell>{row[1]}</TableCell><TableCell>{row[2]}</TableCell><TableCell>{formatCurrency(row[3] as number)}</TableCell></TableRow>)}</TableBody></Table></CardContent></Card><Card><CardHeader><div className="flex items-center justify-between"><div><CardTitle>المشرف اللحظي</CardTitle><CardDescription>حركة السوق الآن</CardDescription></div><Badge><RadioIcon className="animate-pulse" />متصل</Badge></div></CardHeader><CardContent className="flex flex-col gap-3">{["تم إصدار سند ترسية جديد", "تم تسجيل دفعة خلاص", "موظف جديد بانتظار الاعتماد"].map((event, index) => <div key={event} className="flex items-center gap-3 rounded-xl border p-3"><div className="flex size-9 items-center justify-center rounded-lg bg-secondary/35"><UserCheckIcon /></div><div><p className="text-sm font-bold">{event}</p><p className="text-xs text-muted-foreground">منذ {index + 1} دقيقة</p></div></div>)}</CardContent></Card></div></div>
+}
+
+function GatekeeperPreview() { return <div className="mx-auto max-w-4xl"><Badge variant="secondary"><QrCodeIcon />بوابة السوق</Badge><h1 className="mt-3 text-3xl font-black">تسجيل بائع وإصدار QR</h1><p className="mb-6 mt-2 text-muted-foreground">نموذج البوّاب لتوثيق المورد والبضاعة عند الدخول.</p><Card><CardHeader><CardTitle>بيانات الدخول</CardTitle><CardDescription>بعد الحفظ تصدر بطاقة QR قابلة للطباعة.</CardDescription></CardHeader><CardContent><EntryForm /></CardContent></Card></div> }
+
+function AuctioneerPreview() { return <div className="mx-auto max-w-4xl"><Badge variant="secondary"><GavelIcon />مسار الدلّال</Badge><h1 className="mt-3 text-3xl font-black">إصدار وتوثيق سند الترسية</h1><p className="mb-6 mt-2 text-muted-foreground">بعد مسح QR تظهر بيانات البضاعة ويسجل الدلّال المشتري والسعر.</p><Card><CardHeader><CardTitle>بيانات الصفقة</CardTitle><CardDescription>العمولات تحسب تلقائياً وقت إصدار السند.</CardDescription></CardHeader><CardContent><SettlementForm token="80de3f55-38f9-478c-9f2b-fde62a25bcc1" entry={{ id: 1, receipt_number: "RSO-E-20260926-000128", entry_kind: "seller", person_name: "سالم محمد الراجحي", mobile_or_id: "0501234567", commodity_type: "خلاص", quantity: 36, unit_label: "كرتون", total_weight_kg: 648, qr_token: "80de3f55-38f9-478c-9f2b-fde62a25bcc1", status: "registered", created_at: new Date().toISOString() }} buyers={[{ id: 1, full_name: "مؤسسة نخبة التمور", phone: "0501234567" }, { id: 2, full_name: "أسواق الخير", phone: "0557654321" }]} /></CardContent></Card></div> }
+
+function PreviewStat({ icon: Icon, label, value }: { icon: typeof PackageCheckIcon; label: string; value: string }) { return <Card><CardHeader className="flex flex-row items-start justify-between"><div><CardDescription>{label}</CardDescription><CardTitle className="mt-2 text-2xl">{value}</CardTitle></div><div className="flex size-10 items-center justify-center rounded-xl bg-secondary/35 text-primary"><Icon /></div></CardHeader></Card> }
