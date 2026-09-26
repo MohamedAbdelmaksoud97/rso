@@ -81,7 +81,8 @@ try {
 
   const admin = await login(browser, env.RSO_ADMIN_EMAIL, env.RSO_ADMIN_PASSWORD)
   await admin.page.goto(`${baseUrl}/dashboard/admin/reports`, { waitUntil: "networkidle" })
-  await admin.page.getByRole("heading", { name: "حركة الزوار اليومية" }).waitFor()
+  await admin.page.getByRole("heading", { name: "تقارير الأداء والتشغيل" }).waitFor()
+  await admin.page.getByRole("tab", { name: "الحضور" }).click()
   const { data: reportRows, error: reportError } = await service.from("daily_attendance_summary").select("visitors_count,total_entries").order("business_date", { ascending: false }).limit(1)
   if (reportError) throw reportError
   assert(Number(reportRows[0]?.visitors_count) >= 1, "Daily visitor report did not count the new visit")
@@ -126,7 +127,10 @@ try {
   await publicContext.close()
   await admin.context.close()
 } finally {
-  if (entryId) await service.from("market_entries").delete().eq("id", entryId)
+  if (entryId) {
+    await service.from("activity_events").delete().eq("entity_type", "market_entry").eq("entity_id", String(entryId))
+    await service.from("market_entries").delete().eq("id", entryId)
+  }
   if (originalSettings) {
     await service.from("site_settings").update({
       platform_name: originalSettings.platform_name,

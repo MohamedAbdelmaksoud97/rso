@@ -109,6 +109,13 @@ try {
   ])
   originalSettings = settings
   originalCommission = commission
+  if (!settings.public_search_enabled) {
+    const { error: enablePublicSearchError } = await service
+      .from("site_settings")
+      .update({ public_search_enabled: true })
+      .eq("id", true)
+    if (enablePublicSearchError) throw enablePublicSearchError
+  }
   const adminProfile = profiles.find((profile) => profile.role === "admin")
   const gatekeeperProfile = profiles.find((profile) => profile.role === "gatekeeper")
   const auctioneerProfile = profiles.find((profile) => profile.role === "auctioneer")
@@ -155,7 +162,7 @@ try {
     ["/dashboard/admin/users", "المستخدمون والاعتمادات"],
     ["/dashboard/admin/buyers", "المشترون المعتمدون"],
     ["/dashboard/admin/commissions", "العمولات والتسويات اليومية"],
-    ["/dashboard/admin/reports", "حركة الزوار اليومية"],
+    ["/dashboard/admin/reports", "تقارير الأداء والتشغيل"],
     ["/dashboard/admin/settings", "إعدادات الصفحة العامة"],
     ["/dashboard/receipts", "السندات والصفقات"],
     ["/dashboard/account", "الحساب والأمان"],
@@ -211,6 +218,8 @@ try {
   const testAnnouncement = `إعلان اختبار ${runId}`
   await admin.page.locator("#hero_title").fill(testHero)
   await admin.page.locator("#announcement").fill(testAnnouncement)
+  const announcementSwitch = admin.page.locator("#announcement_enabled")
+  if (!await announcementSwitch.isChecked()) await admin.page.getByText("إظهار الشريط التعريفي", { exact: true }).click()
   const statsSwitch = admin.page.locator("#stats_enabled")
   if (await statsSwitch.isChecked()) await admin.page.getByText("إظهار إحصاءات السوق", { exact: true }).click()
   const finalPriceCheckbox = admin.page.locator("#final_price")
@@ -244,7 +253,7 @@ try {
     summary: `حدث لحظي ${runId}`,
   })
   if (realtimeInsertError) throw realtimeInsertError
-  await admin.page.getByText(`حدث لحظي ${runId}`).waitFor({ timeout: 20000 })
+  await admin.page.getByRole("main").getByText(`حدث لحظي ${runId}`, { exact: true }).waitFor({ timeout: 20000 })
   pass("لوحة الإشراف Realtime", "استقبلت الحدث الجديد فورًا داخل واجهة المدير")
   await admin.context.close()
 
@@ -407,6 +416,10 @@ try {
       hero_title: originalSettings.hero_title,
       hero_description: originalSettings.hero_description,
       announcement: originalSettings.announcement,
+      announcement_enabled: originalSettings.announcement_enabled,
+      public_search_enabled: originalSettings.public_search_enabled,
+      workflow_enabled: originalSettings.workflow_enabled,
+      governance_enabled: originalSettings.governance_enabled,
       public_fields: originalSettings.public_fields,
       stats_enabled: originalSettings.stats_enabled,
       public_visitor_count_enabled: originalSettings.public_visitor_count_enabled,
@@ -422,7 +435,10 @@ try {
 
   if (cleanup.activityEntityIds.length) await service.from("activity_events").delete().in("entity_id", cleanup.activityEntityIds)
   if (cleanup.settlementIds.length) await service.from("auction_settlements").delete().in("id", cleanup.settlementIds)
-  if (cleanup.entryIds.length) await service.from("market_entries").delete().in("id", cleanup.entryIds)
+  if (cleanup.entryIds.length) {
+    await service.from("activity_events").delete().eq("entity_type", "market_entry").in("entity_id", cleanup.entryIds.map(String))
+    await service.from("market_entries").delete().in("id", cleanup.entryIds)
+  }
   if (cleanup.buyerIds.length) await service.from("approved_buyers").delete().in("id", cleanup.buyerIds)
   for (const userId of cleanup.userIds) await service.auth.admin.deleteUser(userId)
 }

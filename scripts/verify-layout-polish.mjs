@@ -110,6 +110,9 @@ try {
 
   await context.close()
 } finally {
-  if (entryId) await service.from("market_entries").delete().eq("id", entryId)
+  if (entryId) {
+    await service.from("activity_events").delete().eq("entity_type", "market_entry").eq("entity_id", String(entryId))
+    await service.from("market_entries").delete().eq("id", entryId)
+  }
   await browser.close()
 }

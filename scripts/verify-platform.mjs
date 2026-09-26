@@ -312,7 +312,9 @@ try {
   const timer = setTimeout(() => rejectRealtime(new Error(`Realtime event was not received. Statuses: ${realtimeStatuses.join(", ")}`)), 30000)
   const channel = adminSession.supabase
     .channel(`verification-${probe}`)
-    .on("postgres_changes", { event: "INSERT", schema: "public", table: "activity_events", filter: `entity_id=eq.${probe}` }, (payload) => resolveRealtime(payload))
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "activity_events" }, (payload) => {
+      if (payload.new?.entity_id === probe) resolveRealtime(payload)
+    })
     .subscribe(async (status, statusError) => {
       realtimeStatuses.push(statusError ? `${status}:${statusError.message}` : status)
       if (status !== "SUBSCRIBED") return
@@ -335,7 +337,17 @@ try {
 
   const { data: publicStats, error: publicStatsError } = await anonymous.rpc("get_public_market_stats")
   if (publicStatsError) throw publicStatsError
-  assert(Number(publicStats?.[0]?.verified_receipts ?? 0) >= 1, "Public market statistics are unavailable")
+  const { data: publicStatsSettings, error: publicStatsSettingsError } = await service
+    .from("site_settings")
+    .select("stats_enabled")
+    .eq("id", true)
+    .single()
+  if (publicStatsSettingsError) throw publicStatsSettingsError
+  const publicReceiptCount = Number(publicStats?.[0]?.verified_receipts ?? 0)
+  assert(
+    publicStatsSettings.stats_enabled ? publicReceiptCount >= 1 : publicReceiptCount === 0,
+    "Public market statistics do not match the manager visibility setting",
+  )
   checks.push("live-public-stats")
 
   console.log(JSON.stringify({

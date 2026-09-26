@@ -1,0 +1,159 @@
+{
+  "generatedAt": "2026-09-26T16:04:21.482Z",
+  "pages": [
+    {
+      "label": "الرئيسية",
+      "path": "/",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 34
+    },
+    {
+      "label": "تسجيل الدخول",
+      "path": "/auth/login",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 39
+    },
+    {
+      "label": "إنشاء حساب",
+      "path": "/auth/register",
+      "violations": [],
+      "incomplete": 1,
+      "passes": 39
+    },
+    {
+      "label": "نسيت كلمة المرور",
+      "path": "/auth/forgot-password",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 38
+    },
+    {
+      "label": "التحقق العام",
+      "path": "/verify",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 34
+    },
+    {
+      "label": "لوحة المدير",
+      "path": "/dashboard",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 41
+    },
+    {
+      "label": "إدارة المستخدمين",
+      "path": "/dashboard/admin/users",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 44
+    },
+    {
+      "label": "المشترون المعتمدون",
+      "path": "/dashboard/admin/buyers",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 45
+    },
+    {
+      "label": "العمولات",
+      "path": "/dashboard/admin/commissions",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 45
+    },
+    {
+      "label": "التقارير",
+      "path": "/dashboard/admin/reports",
+      "violations": [],
+      "incomplete": 1,
+      "passes": 48
+    },
+    {
+      "label": "إعدادات المنصة",
+      "path": "/dashboard/admin/settings",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 42
+    },
+    {
+      "label": "سجل السندات للمدير",
+      "path": "/dashboard/receipts",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 41
+    },
+    {
+      "label": "حساب المدير",
+      "path": "/dashboard/account",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 41
+    },
+    {
+      "label": "نافذة الإشعارات",
+      "path": "/dashboard#notifications",
+      "violations": [],
+      "incomplete": 2,
+      "passes": 31
+    },
+    {
+      "label": "لوحة البواب",
+      "path": "/dashboard",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 41
+    },
+    {
+      "label": "تسجيل الدخولات",
+      "path": "/dashboard/entries/new",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 42
+    },
+    {
+      "label": "سجل سندات البواب",
+      "path": "/dashboard/receipts",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 41
+    },
+    {
+      "label": "حساب البواب",
+      "path": "/dashboard/account",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 41
+    },
+    {
+      "label": "لوحة الدلال",
+      "path": "/dashboard",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 41
+    },
+    {
+      "label": "توثيق الترسية",
+      "path": "/dashboard/settlements/new",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 40
+    },
+    {
+      "label": "سجل سندات الدلال",
+      "path": "/dashboard/receipts",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 41
+    },
+    {
+      "label": "حساب الدلال",
+      "path": "/dashboard/account",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 41
+    }
+  ]
+}

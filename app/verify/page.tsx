@@ -31,7 +31,7 @@ export default async function VerifyPage({ searchParams }: { searchParams: Promi
   const settings = await getSiteSettings()
 
   if (!settings.public_search_enabled) {
-    return <main className="min-h-screen"><PublicSettingsSync /><header className="border-b bg-card shadow-sm"><div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4"><BrandLogo compact /><Button render={<Link href="/" />} nativeButton={false} variant="ghost"><ArrowRightIcon data-icon="inline-start" />الرئيسية</Button></div></header><section className="mx-auto max-w-3xl px-5 py-14"><Alert><SearchIcon /><AlertTitle>التحقق العام متوقف مؤقتًا</AlertTitle><AlertDescription>أوقف مدير المنصة البحث العام عن السندات. يمكنك العودة إلى الصفحة الرئيسية أو المحاولة لاحقًا.</AlertDescription></Alert></section></main>
+    return <main className="min-h-screen"><PublicSettingsSync /><header className="border-b bg-card shadow-sm"><div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4"><BrandLogo compact /><Button render={<Link href="/" />} nativeButton={false} variant="ghost"><ArrowRightIcon data-icon="inline-start" />الرئيسية</Button></div></header><section className="mx-auto max-w-3xl px-5 py-14"><h1 className="sr-only">التحقق العام من السندات</h1><Alert><SearchIcon /><AlertTitle>التحقق العام متوقف مؤقتًا</AlertTitle><AlertDescription>أوقف مدير المنصة البحث العام عن السندات. يمكنك العودة إلى الصفحة الرئيسية أو المحاولة لاحقًا.</AlertDescription></Alert></section></main>
   }
 
   let results: PublicReceipt[] = []
