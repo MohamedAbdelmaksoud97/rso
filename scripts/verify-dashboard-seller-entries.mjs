@@ -72,19 +72,45 @@ try {
   assert(displayedValue === expectedValue, `عدد البائعين في اللوحة (${displayedValue}) لا يطابق قاعدة البيانات (${expectedValue})`)
   assert(await page.getByText("البائعون المسجلون اليوم", { exact: true }).count() === 1, "وصف المؤشر غير واضح")
   assert(await page.getByText("دخولات السوق", { exact: true }).count() === 0, "ما زال المسمى القديم ظاهرًا")
+  assert(await page.getByText("زوار اليوم", { exact: true }).count() === 0, "مؤشر الزوار ظاهر للدلال")
 
   await page.screenshot({ path: resolve(screenshots, "auctioneer-today-seller-entries.png"), fullPage: true })
+
+  const adminContext = await browser.newContext({ viewport: { width: 1440, height: 1000 } })
+  const adminPage = await adminContext.newPage()
+  await adminPage.goto(`${baseUrl}/auth/login`, { waitUntil: "networkidle" })
+  await adminPage.locator("#email").fill(env.RSO_ADMIN_EMAIL)
+  await adminPage.locator("#password").fill(env.RSO_ADMIN_PASSWORD)
+  await Promise.all([
+    adminPage.waitForURL((url) => url.pathname === "/dashboard", { timeout: 20_000 }),
+    adminPage.getByRole("button", { name: "دخول إلى المنصة" }).click(),
+  ])
+
+  const adminSellerCard = adminPage.getByText("دخولات البائعين اليوم", { exact: true }).locator('xpath=ancestor::*[@data-slot="card"][1]')
+  const visitorCard = adminPage.getByText("زوار اليوم", { exact: true }).locator('xpath=ancestor::*[@data-slot="card"][1]')
+  const adminSellerValue = (await adminSellerCard.locator('[data-slot="card-title"]').textContent())?.trim()
+  const visitorValue = (await visitorCard.locator('[data-slot="card-title"]').textContent())?.trim()
+  const expectedVisitorValue = new Intl.NumberFormat("ar-SA", { maximumFractionDigits: 2 }).format(visitorCount)
+
+  assert(adminSellerValue === expectedValue, `عدد البائعين لدى المدير (${adminSellerValue}) لا يطابق قاعدة البيانات (${expectedValue})`)
+  assert(visitorValue === expectedVisitorValue, `عدد الزوار لدى المدير (${visitorValue}) لا يطابق قاعدة البيانات (${expectedVisitorValue})`)
+  assert(await adminPage.getByText("الزيارات المسجلة اليوم", { exact: true }).count() === 1, "وصف مؤشر الزوار غير واضح")
+
+  await adminPage.screenshot({ path: resolve(screenshots, "admin-today-sellers-and-visitors.png"), fullPage: true })
 
   console.log(JSON.stringify({
     ok: true,
     businessDate,
     sellerCount,
-    visitorCountExcluded: visitorCount,
-    displayedValue,
-    checks: ["riyadh-business-day", "seller-only-count", "clear-arabic-label"],
-    screenshot: "auctioneer-today-seller-entries.png",
+    visitorCount,
+    auctioneerSellerValue: displayedValue,
+    adminSellerValue,
+    adminVisitorValue: visitorValue,
+    checks: ["riyadh-business-day", "seller-only-count", "admin-visitor-count", "visitor-card-admin-only", "clear-arabic-labels"],
+    screenshots: ["auctioneer-today-seller-entries.png", "admin-today-sellers-and-visitors.png"],
   }, null, 2))
 
+  await adminContext.close()
   await context.close()
 } finally {
   await browser.close()

@@ -100,11 +100,19 @@ export async function getDashboardData(profile: Profile) {
     .limit(6)
   const settlementQuery = supabase.from("auction_settlements").select("id,receipt_number,buyer_name,buyer_phone,final_price,auctioneer_commission,platform_commission,settled_at,market_entries(person_name,commodity_type,quantity,unit_label,total_weight_kg)", { count: "exact" }).gte("settled_at", startOfBusinessDay.toISOString()).lt("settled_at", endOfBusinessDay.toISOString()).order("settled_at", { ascending: false }).limit(6)
   const settlementTotalsQuery = supabase.from("daily_commission_summary").select("gross_sales,auctioneer_commission,platform_commission").eq("business_date", businessDate)
+  const visitorQuery = profile.role === "admin"
+    ? supabase
+        .from("market_entries")
+        .select("id", { count: "exact", head: true })
+        .eq("entry_kind", "visitor")
+        .gte("created_at", startOfBusinessDay.toISOString())
+        .lt("created_at", endOfBusinessDay.toISOString())
+    : Promise.resolve({ count: 0 })
   const pendingQuery = profile.role === "admin"
     ? supabase.from("profiles").select("id", { count: "exact", head: true }).eq("approval_status", "pending")
     : Promise.resolve({ count: 0 })
 
-  const [entries, settlements, settlementTotals, pending] = await Promise.all([entryQuery, settlementQuery, settlementTotalsQuery, pendingQuery])
+  const [entries, settlements, settlementTotals, visitors, pending] = await Promise.all([entryQuery, settlementQuery, settlementTotalsQuery, visitorQuery, pendingQuery])
   const todaySettlements = (settlements.data ?? []) as unknown as Settlement[]
   const totals = settlementTotals.data ?? []
   const salesTotal = totals.reduce((sum, item) => sum + Number(item.gross_sales), 0)
@@ -115,6 +123,7 @@ export async function getDashboardData(profile: Profile) {
     entries: (entries.data ?? []) as MarketEntry[],
     settlements: todaySettlements,
     entryCount: entries.count ?? 0,
+    visitorCount: visitors.count ?? 0,
     settlementCount: settlements.count ?? 0,
     salesTotal,
     auctioneerCommissionTotal,
