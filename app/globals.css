@@ -156,6 +156,7 @@
   [data-slot="sidebar"], [data-slot="sidebar-gap"] { display: none !important; }
   [data-slot="sidebar-wrapper"] { display: block !important; min-height: 0 !important; }
   [data-slot="sidebar-inset"] { display: block !important; width: 100% !important; background: white !important; }
+  [data-dashboard-content] { padding: 0 !important; }
   [data-report-root] { max-width: none !important; zoom: 0.92; }
   [data-report-card] { break-inside: avoid; border: 1px solid var(--border) !important; box-shadow: none !important; }
   [data-report-metrics] { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 8px !important; }
@@ -165,7 +166,47 @@
   [data-report-charts] .recharts-legend-wrapper { display: none !important; }
   [data-slot="toast-viewport"] { display: none !important; }
   [data-slot="table-container"] { overflow: visible !important; }
-  @page { size: A4 landscape; margin: 10mm; }
+  [data-receipt-root] {
+    max-width: none !important;
+  }
+  [data-receipt-sheet] {
+    width: 100% !important;
+    break-inside: avoid;
+    border: 1px solid var(--border) !important;
+    border-radius: 4mm !important;
+    overflow: hidden !important;
+  }
+  [data-receipt-header] { padding: 4mm 6mm !important; }
+  [data-receipt-header] img { width: 45mm !important; }
+  [data-receipt-content] { padding: 4mm 6mm !important; }
+  [data-receipt-title] { margin-bottom: 4mm !important; }
+  [data-receipt-title] > div { width: 10mm !important; height: 10mm !important; }
+  [data-receipt-title] h1 { margin-top: 2mm !important; font-size: 17pt !important; }
+  [data-receipt-title] p { margin-top: 1mm !important; }
+  [data-receipt-grid] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 2.5mm !important;
+  }
+  [data-receipt-item] {
+    min-width: 0;
+    break-inside: avoid;
+    padding: 3mm !important;
+  }
+  [data-receipt-item] p { overflow-wrap: anywhere; }
+  [data-receipt-separator] { margin-block: 4mm !important; }
+  [data-receipt-commissions] {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 2.5mm !important;
+    padding: 3mm !important;
+  }
+  [data-receipt-note] { margin-top: 4mm !important; line-height: 1.6 !important; }
+
+  html:has([data-receipt-root]) { page: receipt; }
+  html:has([data-report-root]) { page: report; }
+
+  @page { size: A4 portrait; margin: 8mm; }
+  @page receipt { size: A4 portrait; margin: 8mm; }
+  @page report { size: A4 landscape; margin: 10mm; }
   html, body { min-height: 0 !important; background: white !important; }
 }
 

@@ -21,7 +21,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!profile) return <AccessState title="تعذر فتح مساحة العمل" description="تعذر تحميل بيانات حسابك الآن. حاول مرة أخرى أو تواصل مع مدير المنصة إذا استمرت المشكلة." icon={ShieldAlertIcon} />
   if (profile.approval_status !== "approved" || !profile.role) return <AccessState title={profile.approval_status === "pending" ? "طلبك بانتظار اعتماد المدير" : "الدخول إلى الحساب غير متاح"} description={profile.approval_status === "pending" ? "تم تفعيل بريدك بنجاح. سيحدد المدير دورك الوظيفي، وبعد الاعتماد يمكنك الدخول مباشرة." : "راجع مدير المنصة لمعرفة حالة الحساب."} icon={Clock3Icon} />
 
-  return <SidebarProvider><AppSidebar profile={profile} /><SidebarInset><DashboardHeader profile={profile} /><div className="flex-1 p-4 md:p-7">{children}</div></SidebarInset></SidebarProvider>
+  return <SidebarProvider><AppSidebar profile={profile} /><SidebarInset><DashboardHeader profile={profile} /><div className="flex-1 p-4 md:p-7" data-dashboard-content>{children}</div></SidebarInset></SidebarProvider>
 }
 
 function AccessState({ title, description, icon: Icon }: { title: string; description: string; icon: typeof Clock3Icon }) {
