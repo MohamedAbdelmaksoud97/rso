@@ -135,6 +135,7 @@ try {
   for (const [label, path] of [
     ["لوحة الدلال", "/dashboard"],
     ["توثيق الترسية", "/dashboard/settlements/new"],
+    ["عمولات الدلّال وتسوياته", "/dashboard/my-commissions"],
     ["سجل سندات الدلال", "/dashboard/receipts"],
     ["حساب الدلال", "/dashboard/account"],
   ]) await scan(auctioneer.page, label, path)

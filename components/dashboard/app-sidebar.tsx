@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { BarChart3Icon, FileCheck2Icon, GavelIcon, HomeIcon, KeyRoundIcon, LogOutIcon, QrCodeIcon, Settings2Icon, UserCheckIcon, UsersIcon } from "lucide-react"
+import { BarChart3Icon, FileCheck2Icon, GavelIcon, HomeIcon, KeyRoundIcon, LogOutIcon, QrCodeIcon, Settings2Icon, UserCheckIcon, UsersIcon, WalletCardsIcon } from "lucide-react"
 import { logout } from "@/app/actions/auth"
 import { BrandLogo } from "@/components/brand-logo"
 import { PendingSubmitButton } from "@/components/pending-submit-button"
@@ -26,7 +26,10 @@ const roleItems: Record<AppRole, typeof commonItems> = {
     { href: "/dashboard/admin/settings", label: "إعدادات المنصة", icon: Settings2Icon },
   ],
   gatekeeper: [{ href: "/dashboard/entries/new", label: "تسجيل دخول جديد", icon: QrCodeIcon }],
-  auctioneer: [{ href: "/dashboard/settlements/new", label: "مسح وتوثيق ترسية", icon: GavelIcon }],
+  auctioneer: [
+    { href: "/dashboard/settlements/new", label: "مسح وتوثيق ترسية", icon: GavelIcon },
+    { href: "/dashboard/my-commissions", label: "عمولاتي وتسوياتي", icon: WalletCardsIcon },
+  ],
 }
 
 export function AppSidebar({ profile }: { profile: Profile }) {

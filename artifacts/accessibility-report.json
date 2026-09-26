@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-26T16:04:21.482Z",
+  "generatedAt": "2026-09-26T18:34:44.701Z",
   "pages": [
     {
       "label": "الرئيسية",
@@ -69,14 +69,14 @@
       "path": "/dashboard/admin/reports",
       "violations": [],
       "incomplete": 1,
-      "passes": 48
+      "passes": 49
     },
     {
       "label": "إعدادات المنصة",
       "path": "/dashboard/admin/settings",
       "violations": [],
       "incomplete": 0,
-      "passes": 42
+      "passes": 43
     },
     {
       "label": "سجل السندات للمدير",
@@ -140,6 +140,13 @@
       "violations": [],
       "incomplete": 0,
       "passes": 40
+    },
+    {
+      "label": "عمولات الدلّال وتسوياته",
+      "path": "/dashboard/my-commissions",
+      "violations": [],
+      "incomplete": 0,
+      "passes": 41
     },
     {
       "label": "سجل سندات الدلال",

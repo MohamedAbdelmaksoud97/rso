@@ -51,25 +51,39 @@ export async function getCurrentProfile(): Promise<Profile | null> {
 
 export async function getDashboardData(profile: Profile) {
   const supabase = await createClient()
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const businessDate = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Riyadh",
+  }).format(new Date())
+  const startOfBusinessDay = new Date(`${businessDate}T00:00:00+03:00`)
+  const endOfBusinessDay = new Date(startOfBusinessDay)
+  endOfBusinessDay.setUTCDate(endOfBusinessDay.getUTCDate() + 1)
 
   const entryQuery = supabase.from("market_entries").select("*", { count: "exact" }).order("created_at", { ascending: false }).limit(6)
-  const settlementQuery = supabase.from("auction_settlements").select("id,receipt_number,buyer_name,buyer_phone,final_price,auctioneer_commission,platform_commission,settled_at,market_entries(person_name,commodity_type,quantity,unit_label,total_weight_kg)", { count: "exact" }).gte("settled_at", today.toISOString()).order("settled_at", { ascending: false }).limit(6)
+  const settlementQuery = supabase.from("auction_settlements").select("id,receipt_number,buyer_name,buyer_phone,final_price,auctioneer_commission,platform_commission,settled_at,market_entries(person_name,commodity_type,quantity,unit_label,total_weight_kg)", { count: "exact" }).gte("settled_at", startOfBusinessDay.toISOString()).lt("settled_at", endOfBusinessDay.toISOString()).order("settled_at", { ascending: false }).limit(6)
+  const settlementTotalsQuery = supabase.from("daily_commission_summary").select("gross_sales,auctioneer_commission,platform_commission").eq("business_date", businessDate)
   const pendingQuery = profile.role === "admin"
     ? supabase.from("profiles").select("id", { count: "exact", head: true }).eq("approval_status", "pending")
     : Promise.resolve({ count: 0 })
 
-  const [entries, settlements, pending] = await Promise.all([entryQuery, settlementQuery, pendingQuery])
+  const [entries, settlements, settlementTotals, pending] = await Promise.all([entryQuery, settlementQuery, settlementTotalsQuery, pendingQuery])
   const todaySettlements = (settlements.data ?? []) as unknown as Settlement[]
+  const totals = settlementTotals.data ?? []
+  const salesTotal = totals.reduce((sum, item) => sum + Number(item.gross_sales), 0)
+  const auctioneerCommissionTotal = totals.reduce((sum, item) => sum + Number(item.auctioneer_commission), 0)
+  const platformCommissionTotal = totals.reduce((sum, item) => sum + Number(item.platform_commission), 0)
 
   return {
     entries: (entries.data ?? []) as MarketEntry[],
     settlements: todaySettlements,
     entryCount: entries.count ?? 0,
     settlementCount: settlements.count ?? 0,
-    salesTotal: todaySettlements.reduce((sum, item) => sum + Number(item.final_price), 0),
-    commissionTotal: todaySettlements.reduce((sum, item) => sum + Number(item.platform_commission), 0),
+    salesTotal,
+    auctioneerCommissionTotal,
+    platformCommissionTotal,
+    netCommissionTotal: auctioneerCommissionTotal - platformCommissionTotal,
     pendingUsers: pending.count ?? 0,
   }
 }
