@@ -10,6 +10,7 @@
     "bootstrap:admin": "node scripts/bootstrap-admin.mjs",
     "verify:platform": "node scripts/verify-platform.mjs",
     "verify:auth": "node scripts/verify-auth-flows.mjs",
+    "verify:buyers": "node scripts/verify-approved-buyers-crud.mjs",
     "verify:accessibility": "node scripts/verify-accessibility.mjs",
     "verify:pwa": "node scripts/verify-pwa.mjs",
     "verify:features": "node scripts/verify-all-features.mjs",

@@ -5,13 +5,13 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/server"
 import type { AppRole, Profile } from "@/lib/types"
 
-type PlatformOperation = "entry" | "settlement" | "approval" | "buyer" | "commission" | "settings"
+type PlatformOperation = "entry" | "settlement" | "approval" | "buyer" | "buyer-update" | "buyer-delete" | "commission" | "settings"
 
 function platformErrorMessage(operation: PlatformOperation, technicalMessage = "") {
   const message = technicalMessage.toLowerCase()
   if (operation === "settlement" && technicalMessage.includes("الكود غير صالح")) return "تعذر توثيق الصفقة لأن بطاقة البضاعة غير صالحة أو سبق استخدامها."
   if (operation === "settlement" && technicalMessage.includes("إعداد العمولات")) return "لا يمكن توثيق الصفقة قبل تحديد نسب العمولات. راجع مدير المنصة."
-  if (operation === "buyer" && (message.includes("duplicate") || message.includes("unique"))) return "رقم الجوال أو الهوية مسجل مسبقًا لمشترٍ آخر. راجع البيانات ثم حاول مرة أخرى."
+  if (operation.startsWith("buyer") && (message.includes("duplicate") || message.includes("unique"))) return "رقم الجوال أو الهوية مسجل مسبقًا لمشترٍ آخر. راجع البيانات ثم حاول مرة أخرى."
   if (operation === "commission" && technicalMessage.includes("بين 0 و100")) return "أدخل نسبة صحيحة من 0 إلى 100 لكل عمولة."
 
   return {
@@ -19,6 +19,8 @@ function platformErrorMessage(operation: PlatformOperation, technicalMessage = "
     settlement: "تعذر إصدار السند الآن، ولم تُحفظ الصفقة. راجع البيانات ثم حاول مرة أخرى.",
     approval: "تعذر حفظ حالة الموظف الآن. حاول مرة أخرى.",
     buyer: "تعذر إضافة المشتري الآن. راجع البيانات ثم حاول مرة أخرى.",
+    "buyer-update": "تعذر حفظ تعديلات المشتري الآن. راجع البيانات ثم حاول مرة أخرى.",
+    "buyer-delete": "تعذر حذف المشتري من الدليل الآن. حاول مرة أخرى.",
     commission: "تعذر تفعيل نسب العمولات الآن. حاول مرة أخرى.",
     settings: "تعذر نشر الإعدادات الآن. لم تتغير الصفحة العامة، ويمكنك المحاولة مرة أخرى.",
   }[operation]
@@ -110,6 +112,39 @@ export async function createApprovedBuyer(formData: FormData) {
   const { error } = await supabase.from("approved_buyers").insert({ full_name: fullName, phone: phone || null, national_id: nationalId || null, is_active: true, created_by: profile.id })
   if (error) redirect(`/dashboard/admin/buyers?error=${encodeURIComponent(platformErrorMessage("buyer", error.message))}`)
   revalidatePath("/dashboard/admin/buyers")
+  redirect(`/dashboard/admin/buyers?success=${encodeURIComponent("تمت إضافة المشتري واعتماده بنجاح.")}`)
+}
+
+export async function updateApprovedBuyer(buyerId: number, formData: FormData) {
+  const { supabase } = await requireProfile(["admin"])
+  const fullName = String(formData.get("full_name") ?? "").trim()
+  const phone = String(formData.get("phone") ?? "").trim()
+  const nationalId = String(formData.get("national_id") ?? "").trim()
+  if (!Number.isInteger(buyerId) || buyerId <= 0) redirect(`/dashboard/admin/buyers?error=${encodeURIComponent("تعذر تحديد المشتري المطلوب تعديله.")}`)
+  if (fullName.length < 2) redirect(`/dashboard/admin/buyers?error=${encodeURIComponent("أدخل اسم المشتري من حرفين على الأقل.")}`)
+  if (phone && !/^[0-9+ ]{8,20}$/.test(phone)) redirect(`/dashboard/admin/buyers?error=${encodeURIComponent("أدخل رقم جوال صحيحًا من 8 إلى 20 خانة.")}`)
+  const { data, error } = await supabase
+    .from("approved_buyers")
+    .update({ full_name: fullName, phone: phone || null, national_id: nationalId || null })
+    .eq("id", buyerId)
+    .select("id")
+    .maybeSingle()
+  if (error) redirect(`/dashboard/admin/buyers?error=${encodeURIComponent(platformErrorMessage("buyer-update", error.message))}`)
+  if (!data) redirect(`/dashboard/admin/buyers?error=${encodeURIComponent("لم يعد المشتري المطلوب متاحًا. حدّث الصفحة ثم حاول مرة أخرى.")}`)
+  revalidatePath("/dashboard/admin/buyers")
+  revalidatePath("/dashboard/settlements/new")
+  redirect(`/dashboard/admin/buyers?success=${encodeURIComponent("تم حفظ تعديلات المشتري بنجاح.")}`)
+}
+
+export async function deleteApprovedBuyer(buyerId: number) {
+  const { supabase } = await requireProfile(["admin"])
+  if (!Number.isInteger(buyerId) || buyerId <= 0) redirect(`/dashboard/admin/buyers?error=${encodeURIComponent("تعذر تحديد المشتري المطلوب حذفه.")}`)
+  const { data, error } = await supabase.from("approved_buyers").delete().eq("id", buyerId).select("id").maybeSingle()
+  if (error) redirect(`/dashboard/admin/buyers?error=${encodeURIComponent(platformErrorMessage("buyer-delete", error.message))}`)
+  if (!data) redirect(`/dashboard/admin/buyers?error=${encodeURIComponent("لم يعد المشتري المطلوب متاحًا. حدّث الصفحة ثم حاول مرة أخرى.")}`)
+  revalidatePath("/dashboard/admin/buyers")
+  revalidatePath("/dashboard/settlements/new")
+  redirect(`/dashboard/admin/buyers?success=${encodeURIComponent("تم حذف المشتري من الدليل. تظل السندات السابقة محفوظة دون تغيير.")}`)
 }
 
 export async function updateCommissionSettings(formData: FormData) {
