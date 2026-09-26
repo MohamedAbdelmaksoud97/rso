@@ -23,7 +23,7 @@ export default async function Home() {
   return (
     <main className="min-h-screen overflow-hidden">
       <PublicSettingsSync />
-      <header className="relative border-b bg-background/90 backdrop-blur">
+      <header className="relative border-b bg-card shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
           <BrandLogo compact />
           <nav className="hidden items-center gap-7 text-sm font-medium md:flex" aria-label="التنقل الرئيسي">

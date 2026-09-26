@@ -31,7 +31,7 @@ export default async function VerifyPage({ searchParams }: { searchParams: Promi
   const settings = await getSiteSettings()
 
   if (!settings.public_search_enabled) {
-    return <main className="min-h-screen"><PublicSettingsSync /><header className="border-b bg-background/90 backdrop-blur"><div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4"><BrandLogo compact /><Button render={<Link href="/" />} nativeButton={false} variant="ghost"><ArrowRightIcon data-icon="inline-start" />الرئيسية</Button></div></header><section className="mx-auto max-w-3xl px-5 py-14"><Alert><SearchIcon /><AlertTitle>التحقق العام متوقف مؤقتًا</AlertTitle><AlertDescription>أوقف مدير المنصة البحث العام عن السندات. يمكنك العودة إلى الصفحة الرئيسية أو المحاولة لاحقًا.</AlertDescription></Alert></section></main>
+    return <main className="min-h-screen"><PublicSettingsSync /><header className="border-b bg-card shadow-sm"><div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4"><BrandLogo compact /><Button render={<Link href="/" />} nativeButton={false} variant="ghost"><ArrowRightIcon data-icon="inline-start" />الرئيسية</Button></div></header><section className="mx-auto max-w-3xl px-5 py-14"><Alert><SearchIcon /><AlertTitle>التحقق العام متوقف مؤقتًا</AlertTitle><AlertDescription>أوقف مدير المنصة البحث العام عن السندات. يمكنك العودة إلى الصفحة الرئيسية أو المحاولة لاحقًا.</AlertDescription></Alert></section></main>
   }
 
   let results: PublicReceipt[] = []
@@ -43,7 +43,7 @@ export default async function VerifyPage({ searchParams }: { searchParams: Promi
     searchError = Boolean(error && error.code !== "PGRST202")
   }
 
-  return <main className="min-h-screen"><PublicSettingsSync /><header className="border-b bg-background/90 backdrop-blur"><div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4"><BrandLogo compact /><Button render={<Link href="/" />} nativeButton={false} variant="ghost"><ArrowRightIcon data-icon="inline-start" />الرئيسية</Button></div></header><section className="mx-auto flex max-w-3xl flex-col gap-8 px-5 py-14">
+  return <main className="min-h-screen"><PublicSettingsSync /><header className="border-b bg-card shadow-sm"><div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4"><BrandLogo compact /><Button render={<Link href="/" />} nativeButton={false} variant="ghost"><ArrowRightIcon data-icon="inline-start" />الرئيسية</Button></div></header><section className="mx-auto flex max-w-3xl flex-col gap-8 px-5 py-14">
     <div className="text-center"><Badge variant="secondary">التحقق العام</Badge><h1 className="mt-4 text-3xl font-black">تحقق من صحة سند الترسية</h1><p className="mt-3 text-muted-foreground">ابحث برقم السند أو رقم جوال المورد. تظهر الحقول التي اعتمدها مدير المنصة للنشر العام.</p></div>
     <form action="/verify"><InputGroup className="h-13 bg-card shadow-sm"><InputGroupAddon><SearchIcon /></InputGroupAddon><InputGroupInput name="q" defaultValue={query} required minLength={4} placeholder="رقم السند أو الجوال" /><InputGroupAddon align="inline-end"><PendingSubmitButton pendingText="جاري البحث…" size="lg">بحث</PendingSubmitButton></InputGroupAddon></InputGroup></form>
     {searchError && <Alert variant="destructive"><AlertTitle>تعذر إتمام البحث</AlertTitle><AlertDescription>خدمة التحقق غير متاحة مؤقتًا. انتظر قليلًا ثم حاول مرة أخرى.</AlertDescription></Alert>}

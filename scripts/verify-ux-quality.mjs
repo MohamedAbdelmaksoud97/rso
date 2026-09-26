@@ -127,6 +127,26 @@ try {
   for (const viewport of [{ width: 360, height: 800 }, { width: 768, height: 1024 }, { width: 1440, height: 1000 }]) {
     for (const path of adminPaths) await assertResponsive(admin.page, path, viewport)
   }
+  await admin.page.setViewportSize({ width: 1440, height: 1000 })
+  const cdp = await admin.context.newCDPSession(admin.page)
+  await cdp.send("Emulation.setEmulatedMedia", { features: [{ name: "display-mode", value: "standalone" }] })
+  await admin.page.goto(`${baseUrl}/dashboard/admin/settings`, { waitUntil: "networkidle" })
+  await admin.page.evaluate(() => window.scrollTo({ top: 650, behavior: "instant" }))
+  const headerSurface = await admin.page.locator("[data-dashboard-header]").evaluate((header) => {
+    const backgroundColor = getComputedStyle(header).backgroundColor
+    const canvas = document.createElement("canvas")
+    canvas.width = 1
+    canvas.height = 1
+    const context = canvas.getContext("2d")
+    if (!context) return { backgroundColor, alpha: 0 }
+    context.clearRect(0, 0, 1, 1)
+    context.fillStyle = backgroundColor
+    context.fillRect(0, 0, 1, 1)
+    return { backgroundColor, alpha: context.getImageData(0, 0, 1, 1).data[3] }
+  })
+  assert(headerSurface.alpha === 255, `Dashboard header is translucent: ${headerSurface.backgroundColor}`)
+  await admin.page.screenshot({ path: resolve(screenshots, "pwa-dashboard-header-solid.png") })
+  pass("هيدر تطبيق PWA", `خلفية صلبة بقناة شفافية ${headerSurface.alpha}/255 في وضع standalone`)
   await admin.page.setViewportSize({ width: 360, height: 800 })
   await admin.page.goto(`${baseUrl}/dashboard`, { waitUntil: "networkidle" })
   await admin.page.screenshot({ path: resolve(screenshots, "ux-admin-dashboard-mobile.png"), fullPage: true })
@@ -144,7 +164,7 @@ try {
   await auctioneer.context.close()
   pass("استجابة شاشات التشغيل", "شاشتا البواب والدلال تعملان بعرض 360px دون تجاوز أفقي")
 
-  console.log(JSON.stringify({ ok: true, performance: metrics, screenshots: ["ux-loading-login-mobile.png", "ux-home-mobile.png", "ux-admin-dashboard-mobile.png", "ux-attendance-report-tablet.png"] }, null, 2))
+  console.log(JSON.stringify({ ok: true, performance: metrics, screenshots: ["ux-loading-login-mobile.png", "ux-home-mobile.png", "ux-admin-dashboard-mobile.png", "ux-attendance-report-tablet.png", "pwa-dashboard-header-solid.png"] }, null, 2))
 } finally {
   await browser.close()
 }
