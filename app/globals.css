@@ -151,7 +151,20 @@
 @media print {
   [data-print-hidden] { display: none !important; }
   [data-print-sheet] { box-shadow: none !important; border: 0 !important; }
-  body { background: white !important; }
+  [data-slot="sidebar"], [data-slot="sidebar-gap"] { display: none !important; }
+  [data-slot="sidebar-wrapper"] { display: block !important; min-height: 0 !important; }
+  [data-slot="sidebar-inset"] { display: block !important; width: 100% !important; background: white !important; }
+  [data-report-root] { max-width: none !important; zoom: 0.92; }
+  [data-report-card] { break-inside: avoid; border: 1px solid var(--border) !important; box-shadow: none !important; }
+  [data-report-metrics] { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 8px !important; }
+  [data-report-metrics] [data-slot="card-content"] { gap: 8px !important; padding: 10px !important; }
+  [data-report-charts] { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  [data-report-charts] [data-slot="chart"] { height: 190px !important; }
+  [data-report-charts] .recharts-legend-wrapper { display: none !important; }
+  [data-slot="toast-viewport"] { display: none !important; }
+  [data-slot="table-container"] { overflow: visible !important; }
+  @page { size: A4 landscape; margin: 10mm; }
+  html, body { min-height: 0 !important; background: white !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
