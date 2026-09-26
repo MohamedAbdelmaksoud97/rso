@@ -15,6 +15,7 @@
     "verify:visitors": "node scripts/verify-visitor-reporting.mjs",
     "verify:settings": "node scripts/verify-site-settings.mjs",
     "verify:reports": "node scripts/verify-admin-reports.mjs",
+    "verify:layout": "node scripts/verify-layout-polish.mjs",
     "verify:ux": "node scripts/verify-ux-quality.mjs",
     "pwa:icons": "node scripts/generate-pwa-icons.mjs",
     "screenshots": "node scripts/capture-screenshots.mjs"
