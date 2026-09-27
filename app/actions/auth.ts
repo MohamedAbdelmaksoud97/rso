@@ -8,8 +8,30 @@ function messageUrl(path: string, type: "error" | "success", message: string) {
   return `${path}?${type}=${encodeURIComponent(message)}`
 }
 
-function isEmailRateLimit(message: string) {
-  return /rate limit|too many requests/i.test(message)
+type AuthOperation = "register" | "recovery"
+type SafeAuthError = { code?: string; message: string; status?: number }
+
+function authErrorMessage(operation: AuthOperation, error: SafeAuthError) {
+  const code = error.code ?? "unknown"
+  console.warn(`auth.${operation}.failed`, { code, status: error.status ?? null })
+
+  if (code === "over_email_send_rate_limit") {
+    return operation === "register"
+      ? "تم طلب رابط تفعيل لهذا البريد قبل وقت قصير. راجع صندوق الوارد والرسائل غير المرغوبة، أو انتظر دقيقة ثم حاول مرة أخرى."
+      : "تم طلب رابط استعادة لهذا البريد قبل وقت قصير. راجع صندوق الوارد والرسائل غير المرغوبة، أو انتظر دقيقة ثم حاول مرة أخرى."
+  }
+  if (code === "over_request_rate_limit" || /too many requests/i.test(error.message)) {
+    return "تمت محاولات كثيرة خلال وقت قصير. انتظر بضع دقائق ثم حاول مرة أخرى."
+  }
+  if (code === "email_address_not_authorized") {
+    return "لا يستطيع نظام البريد الحالي الإرسال إلى هذا العنوان. تواصل مع مدير المنصة لتفعيل خدمة البريد الخارجي."
+  }
+  if (code === "email_address_invalid") return "تأكد من كتابة بريد إلكتروني صحيح ثم حاول مرة أخرى."
+  if (code === "weak_password") return "اختر كلمة مرور أقوى تتكون من 8 أحرف على الأقل وتجمع بين الحروف والأرقام."
+
+  return operation === "register"
+    ? "تعذر إنشاء طلب الحساب. راجع البيانات أو حاول مرة أخرى."
+    : "تعذر إرسال رابط الاستعادة. حاول مرة أخرى."
 }
 
 export async function login(formData: FormData) {
@@ -42,7 +64,7 @@ export async function register(formData: FormData) {
       data: { full_name: fullName, phone },
     },
   })
-  if (error) redirect(messageUrl("/auth/register", "error", isEmailRateLimit(error.message) ? "تم إرسال عدد كبير من رسائل التفعيل مؤخراً. انتظر قليلاً ثم حاول مرة أخرى." : "تعذر إنشاء طلب الحساب. راجع البيانات أو حاول مرة أخرى."))
+  if (error) redirect(messageUrl("/auth/register", "error", authErrorMessage("register", error)))
   redirect(messageUrl("/auth/check-email", "success", "أرسلنا رابط تفعيل الحساب إلى بريدك الإلكتروني."))
 }
 
@@ -54,7 +76,7 @@ export async function forgotPassword(formData: FormData) {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${origin}/auth/callback?next=/auth/update-password`,
   })
-  if (error) redirect(messageUrl("/auth/forgot-password", "error", isEmailRateLimit(error.message) ? "تم طلب عدة رسائل استعادة مؤخراً. انتظر قليلاً ثم حاول مرة أخرى." : "تعذر إرسال رابط الاستعادة. حاول مرة أخرى."))
+  if (error) redirect(messageUrl("/auth/forgot-password", "error", authErrorMessage("recovery", error)))
   redirect(messageUrl("/auth/check-email", "success", "إذا كان البريد مسجلاً فسيصلك رابط استعادة كلمة المرور."))
 }
 
