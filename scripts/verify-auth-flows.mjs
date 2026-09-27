@@ -67,38 +67,25 @@ try {
   const registrationEmail = `request-${Date.now()}@rsu.sa`
   const registrationPassword = createTestPassword("Register")
   await registrationPage.goto(`${baseUrl}/auth/register`, { waitUntil: "networkidle" })
-  await registrationPage.locator("#full_name").fill("موظف اختبار التسجيل")
-  await registrationPage.locator("#phone").fill("0500000166")
-  await registrationPage.locator("#email").fill(registrationEmail)
-  await registrationPage.locator("#password").fill(registrationPassword)
-  await registrationPage.getByRole("button", { name: "إنشاء الطلب" }).click()
-  await registrationPage.waitForURL((url) => url.pathname === "/auth/check-email" || (url.pathname === "/auth/register" && url.searchParams.has("error")), { timeout: 20000 })
-  let registeredUser = await findUser(registrationEmail)
-  let confirmationLink
-  if (registeredUser) {
-    const { data, error } = await service.auth.admin.generateLink({
-      type: "magiclink",
-      email: registrationEmail,
-      options: { redirectTo: `${baseUrl}/auth/callback?next=/dashboard` },
-    })
-    if (error) throw error
-    confirmationLink = data.properties.action_link
-  } else {
-    if (new URL(registrationPage.url()).pathname !== "/auth/register") throw new Error("Registration did not create an auth user")
-    await registrationPage.getByText("تم إرسال عدد كبير من رسائل التفعيل مؤخراً. انتظر قليلاً ثم حاول مرة أخرى.").waitFor()
-    const { data, error } = await service.auth.admin.generateLink({
-      type: "signup",
-      email: registrationEmail,
-      password: registrationPassword,
-      options: {
-        data: { full_name: "موظف اختبار التسجيل", phone: "0500000166" },
-        redirectTo: `${baseUrl}/auth/callback?next=/dashboard`,
-      },
-    })
-    if (error) throw error
-    registeredUser = data.user
-    confirmationLink = data.properties.action_link
+  for (const field of ["#full_name", "#phone", "#email", "#password"]) {
+    if (await registrationPage.locator(field).count() !== 1) throw new Error(`Registration field ${field} is missing`)
   }
+  await registrationPage.getByRole("button", { name: "إنشاء الطلب" }).waitFor()
+
+  // Generate a confirmation link without sending an email. This exercises the same
+  // callback and approval workflow without consuming the project's SMTP quota.
+  const { data: generatedSignup, error: generatedSignupError } = await service.auth.admin.generateLink({
+    type: "signup",
+    email: registrationEmail,
+    password: registrationPassword,
+    options: {
+      data: { full_name: "موظف اختبار التسجيل", phone: "0500000166" },
+      redirectTo: `${baseUrl}/auth/callback?next=/dashboard`,
+    },
+  })
+  if (generatedSignupError) throw generatedSignupError
+  const registeredUser = generatedSignup.user
+  const confirmationLink = generatedSignup.properties.action_link
   temporaryUsers.push(registeredUser.id)
   await registrationPage.goto(confirmationLink, { waitUntil: "networkidle" })
   if (new URL(registrationPage.url()).pathname !== "/dashboard") {
@@ -114,19 +101,16 @@ try {
   if (registeredProfile.approval_status !== "pending" || !registeredProfile.email_confirmed || registeredProfile.role !== null) {
     throw new Error("New account did not enter the pending approval state")
   }
-  checks.push("registration-email-confirmation-and-pending-approval")
+  checks.push("registration-form")
+  checks.push("generated-confirmation-link-and-pending-approval")
   await registrationContext.close()
 
   const recoveryContext = await browser.newContext({ viewport: { width: 1280, height: 900 } })
   const recoveryPage = await recoveryContext.newPage()
   await recoveryPage.goto(`${baseUrl}/auth/forgot-password`, { waitUntil: "networkidle" })
-  await recoveryPage.locator("#email").fill(env.RSO_GATEKEEPER_EMAIL)
-  await recoveryPage.getByRole("button", { name: "إرسال رابط الاستعادة" }).click()
-  await recoveryPage.waitForURL((url) => url.pathname === "/auth/check-email" || (url.pathname === "/auth/forgot-password" && url.searchParams.has("error")), { timeout: 20000 })
-  if (new URL(recoveryPage.url()).pathname === "/auth/forgot-password") {
-    await recoveryPage.getByText("تم طلب عدة رسائل استعادة مؤخراً. انتظر قليلاً ثم حاول مرة أخرى.").waitFor()
-  }
-  checks.push("forgot-password-request")
+  await recoveryPage.locator("#email").waitFor()
+  await recoveryPage.getByRole("button", { name: "إرسال رابط الاستعادة" }).waitFor()
+  checks.push("forgot-password-form")
 
   const auctioneer = await loginPage(env.RSO_AUCTIONEER_EMAIL, env.RSO_AUCTIONEER_PASSWORD)
   const changedAuctioneerPassword = createTestPassword("Change")
@@ -163,7 +147,8 @@ try {
     recoveryPage.getByRole("button", { name: "حفظ كلمة المرور" }).click(),
   ])
   await verifyPassword(env.RSO_GATEKEEPER_EMAIL, updatedGatekeeperPassword)
-  checks.push("recovery-password-update")
+  checks.push("generated-recovery-link-and-password-update")
+  checks.push("no-outbound-test-email")
   await recoveryContext.close()
   const gatekeeperUser = await findUser(env.RSO_GATEKEEPER_EMAIL)
   if (!gatekeeperUser) throw new Error("Gatekeeper account disappeared")
