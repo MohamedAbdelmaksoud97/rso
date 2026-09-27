@@ -28,7 +28,25 @@ export function PwaManager() {
       setIsOffline(!navigator.onLine)
     }, 0)
 
-    const register = () => navigator.serviceWorker?.register("/sw.js", { scope: "/", updateViaCache: "none" }).catch(() => undefined)
+    const hadController = Boolean(navigator.serviceWorker?.controller)
+    let reloadingForUpdate = false
+    const handleControllerChange = () => {
+      if (!hadController || reloadingForUpdate) return
+      reloadingForUpdate = true
+      window.location.reload()
+    }
+    navigator.serviceWorker?.addEventListener("controllerchange", handleControllerChange)
+
+    const register = async () => {
+      try {
+        const registration = await navigator.serviceWorker?.register("/sw.js", { scope: "/", updateViaCache: "none" })
+        if (!registration) return
+        await registration.update()
+        registration.waiting?.postMessage({ type: "SKIP_WAITING" })
+      } catch {
+        // The web application remains fully usable when PWA registration is unavailable.
+      }
+    }
     if (document.readyState === "complete") register()
     else window.addEventListener("load", register, { once: true })
 
@@ -53,6 +71,7 @@ export function PwaManager() {
       window.removeEventListener("appinstalled", handleInstalled)
       window.removeEventListener("online", handleOnline)
       window.removeEventListener("offline", handleOffline)
+      navigator.serviceWorker?.removeEventListener("controllerchange", handleControllerChange)
     }
   }, [])
 

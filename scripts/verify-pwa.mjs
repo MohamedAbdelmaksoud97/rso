@@ -65,8 +65,8 @@ try {
   })
 
   assert(browserState.controlled && browserState.registrationCount === 1, "The page is not controlled by the service worker")
-  assert(browserState.cacheNames.includes("rso-pwa-v2-static"), "Static PWA cache was not created")
-  assert(browserState.cacheNames.includes("rso-pwa-v2-runtime") && browserState.cachedUrls.includes("/"), "The latest public homepage was not cached for offline use")
+  assert(browserState.cacheNames.includes("rso-pwa-v3-static"), "Static PWA cache was not created")
+  assert(browserState.cacheNames.includes("rso-pwa-v3-runtime") && browserState.cachedUrls.includes("/"), "The latest public homepage was not cached for offline use")
   assert(!browserState.cachedUrls.some((path) => path.startsWith("/dashboard") || path.startsWith("/auth")), "Sensitive account pages were cached")
   assert(browserState.manifestHref === "/manifest.webmanifest", "Manifest link is missing from the document")
   assert(browserState.appleIcon === "/apple-touch-icon.png", "Apple touch icon is missing")
@@ -90,6 +90,15 @@ try {
   const offlineText = await page.locator("body").innerText()
   assert(offlineText.includes("أنت غير متصل بالإنترنت"), "Offline navigation did not show the safe fallback page")
   checks.push("offline-fallback")
+
+  await page.evaluate(async () => {
+    const cacheNames = await caches.keys()
+    await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)))
+  })
+  await page.goto(`${baseUrl}/unavailable-with-empty-cache`, { waitUntil: "domcontentloaded" })
+  const emptyCacheFallback = await page.locator("body").innerText()
+  assert(emptyCacheFallback.includes("تعذر الاتصال بالمنصة"), "An empty PWA cache surfaced a browser ERR_FAILED page")
+  checks.push("empty-cache-safe-fallback")
   await context.setOffline(false)
   await context.close()
 } finally {
