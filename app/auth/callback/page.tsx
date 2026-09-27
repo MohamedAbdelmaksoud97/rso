@@ -40,6 +40,14 @@ export default function AuthCallbackPage() {
         authError = new Error("Missing authentication parameters")
       }
 
+      // Confirmation codes are single-use. If this component is mounted again after
+      // a successful exchange, the second exchange can fail although the session is
+      // already valid. Treat the confirmed session as the source of truth.
+      if (authError) {
+        const { data: authenticated } = await supabase.auth.getUser()
+        if (authenticated.user) authError = null
+      }
+
       if (!active) return
       if (authError) {
         window.history.replaceState(null, "", "/auth/callback")

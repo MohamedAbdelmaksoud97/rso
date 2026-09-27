@@ -16,7 +16,7 @@ const env = Object.fromEntries(
 const service = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 })
-const baseUrl = "http://localhost:3000"
+const baseUrl = process.env.RSO_TEST_BASE_URL ?? "http://localhost:3000"
 const browser = await chromium.launch({
   headless: true,
   executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
@@ -85,9 +85,12 @@ try {
   })
   if (generatedSignupError) throw generatedSignupError
   const registeredUser = generatedSignup.user
-  const confirmationLink = generatedSignup.properties.action_link
+  const confirmationToken = generatedSignup.properties.hashed_token
   temporaryUsers.push(registeredUser.id)
-  await registrationPage.goto(confirmationLink, { waitUntil: "networkidle" })
+  await registrationPage.goto(
+    `${baseUrl}/auth/callback?token_hash=${encodeURIComponent(confirmationToken)}&type=signup&next=/dashboard`,
+    { waitUntil: "networkidle" },
+  )
   if (new URL(registrationPage.url()).pathname !== "/dashboard") {
     throw new Error(`Confirmation link ended at ${new URL(registrationPage.url()).pathname}${new URL(registrationPage.url()).search}`)
   }
@@ -103,6 +106,10 @@ try {
   }
   checks.push("registration-form")
   checks.push("generated-confirmation-link-and-pending-approval")
+  await registrationPage.goto(`${baseUrl}/auth/callback`, { waitUntil: "networkidle" })
+  await registrationPage.waitForURL((url) => url.pathname === "/dashboard", { timeout: 20_000 })
+  await registrationPage.getByText("طلبك بانتظار اعتماد المدير").waitFor()
+  checks.push("confirmed-session-survives-repeated-callback")
   await registrationContext.close()
 
   const recoveryContext = await browser.newContext({ viewport: { width: 1280, height: 900 } })
@@ -138,7 +145,10 @@ try {
     options: { redirectTo: `${baseUrl}/auth/callback?next=/auth/update-password` },
   })
   if (recoveryLinkError) throw recoveryLinkError
-  await recoveryPage.goto(recoveryLink.properties.action_link, { waitUntil: "networkidle" })
+  await recoveryPage.goto(
+    `${baseUrl}/auth/callback?token_hash=${encodeURIComponent(recoveryLink.properties.hashed_token)}&type=recovery&next=/auth/update-password`,
+    { waitUntil: "networkidle" },
+  )
   await recoveryPage.waitForURL((url) => url.pathname === "/auth/update-password", { timeout: 20000 })
   await recoveryPage.locator("#password").fill(updatedGatekeeperPassword)
   await recoveryPage.locator("#confirm_password").fill(updatedGatekeeperPassword)
