@@ -44,6 +44,7 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url)
   if (url.origin !== self.location.origin) return
+  if (url.pathname === "/pwa-reset.html") return
 
   if (request.mode === "navigate") {
     event.respondWith((async () => {

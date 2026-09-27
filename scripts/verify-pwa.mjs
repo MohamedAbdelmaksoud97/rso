@@ -32,6 +32,11 @@ assert(workerResponse.headers.get("cache-control")?.includes("no-store"), "Servi
 assert(workerResponse.headers.get("service-worker-allowed") === "/", "Service worker scope header is missing")
 checks.push("service-worker-security-headers")
 
+const resetResponse = await fetch(`${baseUrl}/pwa-reset.html`)
+assert(resetResponse.ok, "PWA recovery page is unavailable")
+assert(resetResponse.headers.get("cache-control")?.includes("no-store"), "PWA recovery page must not be cached")
+checks.push("pwa-recovery-page")
+
 const browser = await chromium.launch({
   headless: true,
   executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
@@ -100,6 +105,15 @@ try {
   assert(emptyCacheFallback.includes("تعذر الاتصال بالمنصة"), "An empty PWA cache surfaced a browser ERR_FAILED page")
   checks.push("empty-cache-safe-fallback")
   await context.setOffline(false)
+
+  await page.goto(`${baseUrl}/pwa-reset.html`, { waitUntil: "domcontentloaded" })
+  await page.locator("body[data-reset-state='done']").waitFor()
+  const recoveredState = await page.evaluate(async () => ({
+    registrationCount: (await navigator.serviceWorker.getRegistrations()).length,
+    rsoCaches: (await caches.keys()).filter((cacheName) => cacheName.startsWith("rso-pwa-")).length,
+  }))
+  assert(recoveredState.registrationCount === 0 && recoveredState.rsoCaches === 0, "PWA recovery did not remove the stale worker and caches")
+  checks.push("stale-worker-self-recovery")
   await context.close()
 } finally {
   await browser.close()

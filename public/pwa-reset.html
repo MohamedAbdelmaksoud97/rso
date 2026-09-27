@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>إصلاح اتصال منصة رسو</title>
+    <style>
+      :root { color-scheme: light; font-family: Cairo, system-ui, sans-serif; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 1.25rem; color: #183424; background: #faf8f3; }
+      main { width: min(100%, 30rem); padding: 2rem; border: 1px solid #ded8ca; border-radius: 1.5rem; background: #fff; text-align: center; box-shadow: 0 1rem 3rem #18342418; }
+      .mark { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; margin: 0 auto 1rem; border-radius: 1rem; color: #fff; background: #0b4f24; font-size: 1.5rem; font-weight: 800; }
+      h1 { margin: 0 0 .75rem; font-size: 1.5rem; }
+      p { margin: 0; color: #657068; line-height: 1.9; }
+      a { display: inline-flex; justify-content: center; margin-top: 1.5rem; border-radius: .9rem; padding: .8rem 1.25rem; color: #fff; background: #0b4f24; text-decoration: none; font-weight: 700; }
+      [hidden] { display: none; }
+    </style>
+  </head>
+  <body data-reset-state="working">
+    <main>
+      <div class="mark" aria-hidden="true">رسو</div>
+      <h1 id="title">جاري إصلاح اتصال المنصة</h1>
+      <p id="message" role="status" aria-live="polite">لحظات ويتم حذف نسخة التطبيق القديمة من هذا المتصفح.</p>
+      <a id="continue" href="/" hidden>فتح منصة رسو</a>
+    </main>
+    <script>
+      (async () => {
+        const title = document.getElementById("title")
+        const message = document.getElementById("message")
+        const continueLink = document.getElementById("continue")
+        try {
+          if ("serviceWorker" in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations()
+            await Promise.all(registrations.map((registration) => registration.unregister()))
+          }
+          if ("caches" in window) {
+            const cacheNames = await caches.keys()
+            await Promise.all(cacheNames.filter((name) => name.startsWith("rso-pwa-")).map((name) => caches.delete(name)))
+          }
+          document.body.dataset.resetState = "done"
+          title.textContent = "تم إصلاح اتصال المنصة"
+          message.textContent = "تم حذف النسخة القديمة بأمان. يمكنك الآن فتح المنصة من جديد."
+          continueLink.hidden = false
+        } catch {
+          document.body.dataset.resetState = "failed"
+          title.textContent = "تعذر إكمال الإصلاح"
+          message.textContent = "أغلق جميع تبويبات منصة رسو، ثم أعد فتح هذه الصفحة وحاول مرة أخرى."
+        }
+      })()
+    </script>
+  </body>
+</html>
