@@ -3,12 +3,12 @@ import { ArrowLeftIcon, BadgeCheckIcon, FileCheck2Icon, GavelIcon, QrCodeIcon, S
 import { BrandLogo } from "@/components/brand-logo"
 import { PublicContentSection } from "@/components/content/public-content-section"
 import { PublicSettingsSync } from "@/components/public-settings-sync"
+import { PublicFooter } from "@/components/public-footer"
 import { Badge } from "@/components/ui/badge"
 import { PendingSubmitButton } from "@/components/pending-submit-button"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
-import { Separator } from "@/components/ui/separator"
 import { formatNumber } from "@/lib/constants"
 import { getPublicContentPosts, getPublicMarketStats, getSiteSettings } from "@/lib/queries"
 
@@ -96,7 +96,7 @@ export default async function Home() {
         </div>
       </section>}
 
-      <footer className="bg-primary text-primary-foreground"><div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-10 md:flex-row md:items-center md:justify-between lg:px-8"><div><BrandLogo compact className="brightness-0 invert" /><p className="mt-2 max-w-xl text-sm leading-7 opacity-70">{settings.platform_name} — المنظومة الرقمية لحوكمة المزادات وتوثيق التعاملات في أسواق النفع العام.</p></div><div className="flex items-center gap-5 text-sm opacity-80">{settings.public_search_enabled && <><Link href="/verify">التحقق من سند</Link><Separator orientation="vertical" className="h-4 bg-primary-foreground/20" /></>}<Link href="/auth/login">دخول الموظفين</Link></div></div></footer>
+      <PublicFooter platformName={settings.platform_name} publicSearchEnabled={settings.public_search_enabled} />
     </main>
   )
 }
